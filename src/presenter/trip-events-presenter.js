@@ -1,12 +1,12 @@
 import NewPointView from '../view/new-point-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import LoadingView from '../view/loading-view.js';
 import NavigationView from '../view/navigation-menu-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
-import StatsView from '../view/stats-view.js';
+// import StatsView from '../view/stats-view.js';
+// import LoadingView from '../view/loading-view.js';
 import TripInfoView from '../view/trip-info-view.js';
 import { render, RenderPosition } from '../render.js';
 
