@@ -10,6 +10,7 @@ import SortView from '../view/sort-view.js';
 import TripInfoView from '../view/trip-info-view.js';
 import { render, RenderPosition } from '../render.js';
 import { isEscape } from '../util.js';
+import EmptyView from '../view/empty-view.js';
 
 
 export default class TripEventPresenter {
@@ -48,8 +49,12 @@ export default class TripEventPresenter {
     }
     // render(new EditPointView(this.tripPoints[1]), pointList.Element); */
 
-    for (const tripPoint of this.tripPoints) {
-      this.#renderTripPoint(tripPoint);
+    if (this.tripPoints.lenght === 0) {
+      render(new EmptyView(), this.#pointsList);
+    } else {
+      for (const tripPoint of this.tripPoints) {
+        this.#renderTripPoint(tripPoint);
+      }
     }
   }
 
