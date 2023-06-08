@@ -36,4 +36,6 @@ function DateDifference(dateFrom, dateTo) {
   return dateDiff;
 }
 
-export {GetRandomPositiveNumber, GetRandomElement, ShuffleArray, CapitalizeFirstLetter, DateDifference};
+const isEscape = (evt) => evt.key === 'Escape';
+
+export {GetRandomPositiveNumber, GetRandomElement, ShuffleArray, CapitalizeFirstLetter, DateDifference, isEscape};

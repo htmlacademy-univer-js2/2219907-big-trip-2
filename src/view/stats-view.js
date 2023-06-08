@@ -17,18 +17,21 @@ const createStatisticsTemplate = () => (`
 `);
 
 export default class StatsView {
-  getTemplate() {
+  constructor() {
+    this.#element = null;
+  }
+  get Template() {
     return createStatisticsTemplate;
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get Element() {
+    if (!this.#element) {
+      this.#element = createElement(this.Template);
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
