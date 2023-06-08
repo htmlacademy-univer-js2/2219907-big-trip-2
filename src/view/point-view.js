@@ -1,8 +1,7 @@
 import { createElement } from '../render.js';
-import {destinations, offersByType} from '../mock/data.js';
 import { CapitalizeFirstLetter, DateDifference } from '../util.js';
 
-function createPointTemplate(point) {
+function createPointTemplate(point, destinations, offersByType) {
   const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = point;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
@@ -55,22 +54,30 @@ function createPointTemplate(point) {
 `;}
 
 export default class PointView {
-  constructor(point) {
-    this.point = point;
+  #point;
+  #element;
+  #destinations;
+  #offers;
+
+  constructor(point, destinations, offers) {
+    this.#element = null;
+    this.#point = point;
+    this.#destinations = destinations;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point);
+  get template() {
+    return createPointTemplate(this.#point, this.#destinations, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

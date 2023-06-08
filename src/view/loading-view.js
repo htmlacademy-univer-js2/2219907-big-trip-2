@@ -5,18 +5,24 @@ const createLoadingTemplate = () => (`
 `);
 
 export default class LoadingView {
-  getTemplate() {
+  #element;
+
+  constructor() {
+    this.#element = null;
+  }
+
+  get Template() {
     return createLoadingTemplate;
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get Element() {
+    if (!this.#element) {
+      this.#element = createElement(this.Template);
     }
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
