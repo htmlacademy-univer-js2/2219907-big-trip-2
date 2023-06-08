@@ -30,10 +30,10 @@ const createSortTemplate = () => (`
 `);
 
 export default class SortView {
-  #element
+  #element;
 
   constructor() {
-    this.#element = null
+    this.#element = null;
   }
 
   get template() {

@@ -15,7 +15,7 @@ const createTripInfoTemplate = () => (`
 `);
 
 export default class TripInfoView {
-  #element
+  #element;
 
   constructor() {
     this.#element = null;
