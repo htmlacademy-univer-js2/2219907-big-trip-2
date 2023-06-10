@@ -21,8 +21,8 @@ export default class TripEventPresenter {
   #filters;
   #tripEvents;
 
-  constructor(tripPointsModel) {
-    this.#tripPointsModel = tripPointsModel;
+  constructor() {
+    this.#tripPointsModel = null;
     this.#pointsList = new PointListView();
     this.#tripMain = document.body.querySelector('.trip-main');
     this.#navigation = this.#tripMain.querySelector('.trip-controls__navigation');
@@ -31,9 +31,10 @@ export default class TripEventPresenter {
   }
 
   init(tripPointsModel) {
-    this.tripPoints = tripPointsModel.TripPoints;
-    this.offers = tripPointsModel.offers;
-    this.destinations = tripPointsModel.destinations;
+    this.#tripPointsModel = tripPointsModel;
+    this.tripPoints = this.#tripPointsModel.TripPoints;
+    this.offers = this.#tripPointsModel.offers;
+    this.destinations = this.#tripPointsModel.destinations;
 
 
     render(new TripInfoView(), this.#tripMain, RenderPosition.AFTERBEGIN);

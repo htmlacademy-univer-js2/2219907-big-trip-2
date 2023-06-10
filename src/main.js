@@ -4,5 +4,5 @@ import { destinations, offersByType, tripPoints } from './mock/data.js';
 
 const Presenter = new TripEventPresenter();
 const tripPointsModel = new TripPointsModel();
-tripPointsModel.init(tripPoints, destinations, offersByType)
+tripPointsModel.init(tripPoints, destinations, offersByType);
 Presenter.init(tripPointsModel);
