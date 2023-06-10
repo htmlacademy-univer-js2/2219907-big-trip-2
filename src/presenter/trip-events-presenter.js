@@ -1,4 +1,4 @@
-// import NewPointView from '../view/new-point-view.js';
+import NewPointView from '../view/new-point-view.js';
 import EditPointView from '../view/edit-point-view.js';
 import NavigationView from '../view/navigation-menu-view.js';
 import PointListView from '../view/point-list-view.js';
@@ -55,7 +55,6 @@ export default class TripEventPresenter {
 
   #renderTripPoint(tripPoint) {
     const editComponent = new EditPointView(tripPoint, this.#destinations, this.#offersByType);
-    // const newPointComponent = new NewPointView(tripPoint, this.destinations, this.offers);
     const tripPointComponent = new PointView(tripPoint, this.#destinations, this.#offersByType);
 
     const replacePointToEdit = () => replace(editComponent, tripPointComponent);
@@ -94,5 +93,12 @@ export default class TripEventPresenter {
     render(new FilterView(), this.#filters);
     render(new SortView(), this.#tripEvents);
     render(this.#pointsList, this.#tripEvents);
+
+    const newEventButtonHandler = (evt) => {
+      evt.preventDefault();
+      render(new NewPointView(this.#destinations, this.#offersByType), this.#pointsList.element, RenderPosition.BEFOREBEGIN);
+    };
+
+    this.#tripMain.querySelector('.trip-main__event-add-btn').addEventListener('click', newEventButtonHandler);
   }
 }
