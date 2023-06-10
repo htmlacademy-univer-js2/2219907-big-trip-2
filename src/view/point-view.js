@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
-import { CapitalizeFirstLetter, DateDifference } from '../util.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { CapitalizeFirstLetter, DateDifference } from '../utils/trip.js';
 
 function createPointTemplate(point, destinations, offersByType) {
   const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = point;
@@ -53,14 +53,13 @@ function createPointTemplate(point, destinations, offersByType) {
 </li>
 `;}
 
-export default class PointView {
+export default class PointView extends AbstractStatefulView {
   #point;
-  #element;
   #destinations;
   #offers;
 
   constructor(point, destinations, offers) {
-    this.#element = null;
+    super();
     this.#point = point;
     this.#destinations = destinations;
     this.#offers = offers;
@@ -70,14 +69,13 @@ export default class PointView {
     return createPointTemplate(this.#point, this.#destinations, this.#offers);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
 }

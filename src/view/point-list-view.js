@@ -1,26 +1,9 @@
-import { createElement } from '../render.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 const createPointListTemplate = () => '<ul class="trip-events__list"></ul>';
 
-export default class PointListView {
-  #element;
-
-  constructor() {
-    this.#element = null;
-  }
-
+export default class PointListView extends AbstractStatefulView {
   get template() {
     return createPointListTemplate;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

@@ -1,30 +1,31 @@
+import { CreateDestination, CreateOffersByType, CreatePoint } from './mock/data.js';
+
 export default class TripPointsModel {
-  #points;
+  #tripPoints;
   #destinations;
-  #offers;
+  #offersByType;
 
   constructor() {
-    this.#points = null;
+    this.#tripPoints = null;
     this.#destinations = null;
-    this.#offers = null;
+    this.#offersByType = null;
   }
 
-
-  init(points, destinations, offers) {
-    this.#points = points;
-    this.#destinations = destinations;
-    this.#offers = offers;
+  init(destinationsQuantity, tripPointsQuantity) {
+    this.#destinations = Array.from({length: destinationsQuantity}, CreateDestination);
+    this.#offersByType = CreateOffersByType();
+    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint);
   }
 
   get TripPoints () {
-    return this.#points;
+    return this.#tripPoints;
   }
 
   get destinations() {
     return this.#destinations;
   }
 
-  get offers() {
-    return this.#offers;
+  get offersByType() {
+    return this.#offersByType;
   }
 }

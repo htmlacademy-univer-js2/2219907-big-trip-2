@@ -8,9 +8,9 @@ import SortView from '../view/sort-view.js';
 // import StatsView from '../view/stats-view.js';
 // import LoadingView from '../view/loading-view.js';
 import TripInfoView from '../view/trip-info-view.js';
-import { render, RenderPosition } from '../render.js';
-import { isEscape } from '../util.js';
+import { isEscape } from '../utils/common.js';
 import EmptyView from '../view/empty-view.js';
+import {render, replace, RenderPosition} from '../framework/render.js';
 
 
 export default class TripEventPresenter {
@@ -21,8 +21,8 @@ export default class TripEventPresenter {
   #filters;
   #tripEvents;
 
-  constructor(tripPointsModel) {
-    this.#tripPointsModel = tripPointsModel;
+  constructor() {
+    this.#tripPointsModel = null;
     this.#pointsList = new PointListView();
     this.#tripMain = document.body.querySelector('.trip-main');
     this.#navigation = this.#tripMain.querySelector('.trip-controls__navigation');
@@ -31,23 +31,12 @@ export default class TripEventPresenter {
   }
 
   init(tripPointsModel) {
-    this.tripPoints = tripPointsModel.TripPoints;
-    this.offers = tripPointsModel.offers;
-    this.destinations = tripPointsModel.destinations;
+    this.#tripPointsModel = tripPointsModel;
+    this.tripPoints = this.#tripPointsModel.TripPoints;
+    this.offers = this.#tripPointsModel.offers;
+    this.destinations = this.#tripPointsModel.destinations;
 
-
-    render(new TripInfoView(), this.#tripMain, RenderPosition.AFTERBEGIN);
-    render(new NavigationView(), this.#navigation);
-    render(new FilterView(), this.#filters);
-    render(new SortView(), this.#tripEvents);
-    render(this.#pointsList, this.#tripEvents);
-
-    /*     // render(new NewPointView(this.tripPoints[0]), pointList.Element);
-    for (let i = 2; i < this.tripPoints.length; i++) {
-      this.#renderTripPoint(new PointView(this.tripPoints[i]), pointList.Element)
-      // render(new PointView(this.tripPoints[i]), pointList.Element);
-    }
-    // render(new EditPointView(this.tripPoints[1]), pointList.Element); */
+    this.#renderHeader();
 
     if (this.tripPoints.lenght === 0) {
       render(new EmptyView(), this.#pointsList);
@@ -61,41 +50,47 @@ export default class TripEventPresenter {
   #renderTripPoint(tripPoint) {
     const editComponent = new EditPointView(tripPoint, this.destinations, this.offers);
     // const newPointComponent = new NewPointView(tripPoint, this.destinations, this.offers);
-    const pointComponent = new PointView(tripPoint, this.destinations, this.offers);
+    const tripPointComponent = new PointView(tripPoint, this.destinations, this.offers);
 
     const replacePointToEdit = () => {
-      this.#pointsList.element.replaceChild(editComponent.element, pointComponent.element);
+      replace(editComponent, tripPointComponent);
     };
 
     const replaceEditToPoint = () => {
-      this.#pointsList.element.replaceChild(pointComponent.element, editComponent.element);
+      replace(tripPointComponent, editComponent);
     };
 
-    const onEscEvt = (evt) => {
+    const escKeyDownHandler = (evt) => {
       if (isEscape(evt)) {
         evt.preventDefault();
         replaceEditToPoint();
-        document.removeEventListener('keydown', onEscEvt  );
+        document.removeEventListener('keydown', escKeyDownHandler  );
       }
     };
 
-    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    tripPointComponent.setClickHandler(() => {
       replacePointToEdit();
-      document.addEventListener('keydown', onEscEvt);
+      document.addEventListener('keydown', escKeyDownHandler);
     });
 
-    editComponent.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
-      evt.preventDefault();
+    editComponent.setClickHandler(() => {
+      replaceEditToPoint.call(this);
+      document.removeEventListener('keydown', escKeyDownHandler);
+    });
+
+    editComponent.setSubmitHandler(() => {
       replaceEditToPoint();
-      document.removeEventListener('keydown', onEscEvt);
+      document.removeEventListener('keydown', escKeyDownHandler);
     });
 
-    editComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceEditToPoint();
-      document.removeEventListener('keydown', onEscEvt);
-    });
+    render(tripPointComponent, this.#pointsList.element);
+  }
 
-    render(pointComponent, this.#pointsList.element);
+  #renderHeader() {
+    render(new TripInfoView(), this.#tripMain, RenderPosition.AFTERBEGIN);
+    render(new NavigationView(), this.#navigation);
+    render(new FilterView(), this.#filters);
+    render(new SortView(), this.#tripEvents);
+    render(this.#pointsList, this.#tripEvents);
   }
 }
