@@ -14,7 +14,7 @@ export default class TripPointsModel {
   init(destinationsQuantity, tripPointsQuantity) {
     this.#destinations = Array.from({length: destinationsQuantity}, CreateDestination);
     this.#offersByType = CreateOffersByType();
-    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint);
+    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint, this);
   }
 
   get TripPoints () {

@@ -51,7 +51,7 @@ const CreateOfferByType = (i) => ({
 
 export const CreateOffersByType = () => [...Array(OfferTypes.length).keys()].map((i) => CreateOfferByType(i));
 
-export const CreatePoint = () => {
+export function CreatePoint() {
   const dates = CreateDates();
   const pointType = GetRandomElement(OfferTypes);
   const offers = this.offersByType.find((offersType) => offersType.type === pointType).offers;

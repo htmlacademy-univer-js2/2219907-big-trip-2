@@ -20,9 +20,15 @@ export default class TripEventPresenter {
   #navigation;
   #filters;
   #tripEvents;
+  #tripPoints;
+  #offersByType;
+  #destinations;
 
   constructor() {
     this.#tripPointsModel = null;
+    this.#tripPoints = null;
+    this.#offersByType = null;
+    this.#destinations = null;
     this.#pointsList = new PointListView();
     this.#tripMain = document.body.querySelector('.trip-main');
     this.#navigation = this.#tripMain.querySelector('.trip-controls__navigation');
@@ -32,33 +38,29 @@ export default class TripEventPresenter {
 
   init(tripPointsModel) {
     this.#tripPointsModel = tripPointsModel;
-    this.tripPoints = this.#tripPointsModel.TripPoints;
-    this.offers = this.#tripPointsModel.offers;
-    this.destinations = this.#tripPointsModel.destinations;
+    this.#tripPoints = this.#tripPointsModel.TripPoints;
+    this.#offersByType = this.#tripPointsModel.offersByType;
+    this.#destinations = this.#tripPointsModel.destinations;
 
     this.#renderHeader();
 
-    if (this.tripPoints.lenght === 0) {
+    if (this.#tripPoints.length === 0) {
       render(new EmptyView(), this.#pointsList);
     } else {
-      for (const tripPoint of this.tripPoints) {
+      for (const tripPoint of this.#tripPoints) {
         this.#renderTripPoint(tripPoint);
       }
     }
   }
 
   #renderTripPoint(tripPoint) {
-    const editComponent = new EditPointView(tripPoint, this.destinations, this.offers);
+    const editComponent = new EditPointView(tripPoint, this.#destinations, this.#offersByType);
     // const newPointComponent = new NewPointView(tripPoint, this.destinations, this.offers);
-    const tripPointComponent = new PointView(tripPoint, this.destinations, this.offers);
+    const tripPointComponent = new PointView(tripPoint, this.#destinations, this.#offersByType);
 
-    const replacePointToEdit = () => {
-      replace(editComponent, tripPointComponent);
-    };
+    const replacePointToEdit = () => replace(editComponent, tripPointComponent);
 
-    const replaceEditToPoint = () => {
-      replace(tripPointComponent, editComponent);
-    };
+    const replaceEditToPoint = () => replace(tripPointComponent, editComponent);
 
     const escKeyDownHandler = (evt) => {
       if (isEscape(evt)) {

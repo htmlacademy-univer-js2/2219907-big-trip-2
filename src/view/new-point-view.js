@@ -1,8 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter } from '../utils/trip.js';
 
-function createNewPointTemplate(point, destinations, offersByType) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers} = point;
+function createNewPointTemplate(tripPoint, destinations, offersByType) {
+  const {type, dateFrom, dateTo, basePrice, destination, offers} = tripPoint;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
   const pointDestination = destinations.find((dest) => dest.id === destination);
@@ -139,18 +139,18 @@ function createNewPointTemplate(point, destinations, offersByType) {
 `;}
 
 export default class NewPointView extends AbstractStatefulView {
-  #point;
+  #tripPoint;
   #destinations;
-  #offers;
+  #offersByType;
 
-  constructor(point, destinations, offers) {
+  constructor(tripPoint, destinations, offersByType) {
     super();
-    this.#point = point;
+    this.#tripPoint = tripPoint;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#offersByType = offersByType;
   }
 
   get template() {
-    return createNewPointTemplate(this.#point,  this.#destinations, this.#offers);
+    return createNewPointTemplate(this.#tripPoint,  this.#destinations, this.#offersByType);
   }
 }
