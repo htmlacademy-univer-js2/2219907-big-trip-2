@@ -21,21 +21,6 @@ function ShuffleArray(array) {
   return array;
 }
 
-function CapitalizeFirstLetter(string) {
-  return string[0].toUpperCase() + string.slice(1);
-}
+const isEscape = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
 
-function DateDifference(dateFrom, dateTo) {
-  let dateDiff = dayjs.duration(dateTo.diff(dateFrom, 'millisecond'));
-
-  if (dateDiff.hours() > 0) {
-    dateDiff = dateDiff.format('HH[H] mm[M]');
-  } else {
-    dateDiff = dateDiff.format('mm[M]');
-  }
-  return dateDiff;
-}
-
-const isEscape = (evt) => evt.key === 'Escape';
-
-export {GetRandomPositiveNumber, GetRandomElement, ShuffleArray, CapitalizeFirstLetter, DateDifference, isEscape};
+export {GetRandomPositiveNumber, GetRandomElement, ShuffleArray, isEscape};

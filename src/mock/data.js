@@ -1,4 +1,4 @@
-import { GetRandomElement, GetRandomPositiveNumber, ShuffleArray } from '../util.js';
+import { GetRandomElement, GetRandomPositiveNumber, ShuffleArray } from '../utils/common.js';
 import dayjs from 'dayjs';
 
 const OfferTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
@@ -31,13 +31,12 @@ const CreatePicture = () => ({
   'description': GetRandomElement(fish)
 });
 
-const CreateDestination = () => ({
+export const CreateDestination = () => ({
   'id': lastId++,
   'description': [...Array(GetRandomPositiveNumber(1,5)).keys()].map(() => (GetRandomElement(fish))).join(' '),
   'name': GetRandomElement(cityNames),
   'pictures': Array.from({length: GetRandomPositiveNumber(1, 5)}, CreatePicture)
 });
-export const destinations = Array.from({length: 10}, CreateDestination);
 
 const CreateOffer = () => ({
   'id': lastId++,
@@ -45,26 +44,25 @@ const CreateOffer = () => ({
   'price': GetRandomPositiveNumber(10, 1000)
 });
 
-const CreateOffersByType = (i) => ({
+const CreateOfferByType = (i) => ({
   'type': OfferTypes[i],
   'offers': Array.from({length: GetRandomPositiveNumber(2, 5)}, CreateOffer)
 });
-export const offersByType = [...Array(OfferTypes.length).keys()].map((i) => CreateOffersByType(i));
+
+export const CreateOffersByType = () => [...Array(OfferTypes.length).keys()].map((i) => CreateOfferByType(i));
 
 export const CreatePoint = () => {
   const dates = CreateDates();
   const pointType = GetRandomElement(OfferTypes);
-  const offers = offersByType.find((offersType) => offersType.type === pointType).offers;
+  const offers = this.offersByType.find((offersType) => offersType.type === pointType).offers;
   return {
     'basePrice': GetRandomPositiveNumber(10, 10000),
     'dateFrom': dates[0],
     'dateTo': dates[1],
-    'destination': GetRandomElement(destinations).id,
+    'destination': GetRandomElement(this.destinations).id,
     'id': lastId++,
     'isFavorite': Boolean(GetRandomPositiveNumber(0,1)),
     'offers': ShuffleArray(offers).slice(0, GetRandomPositiveNumber(1, offers.length)).map((offer) => offer.id),
     'type': pointType
   };
 };
-
-export const tripPoints = Array.from({length: 7}, CreatePoint);

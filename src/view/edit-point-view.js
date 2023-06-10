@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
-import { CapitalizeFirstLetter } from '../util.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { CapitalizeFirstLetter } from '../utils/trip.js';
 
 function createEditPointTemplate(point, destinations, offersByType) {
   const {type, dateFrom, dateTo, basePrice, destination, offers} = point;
@@ -133,14 +133,13 @@ function createEditPointTemplate(point, destinations, offersByType) {
 </li>
 `;}
 
-export default class EditPointView {
+export default class EditPointView extends AbstractStatefulView {
   #point;
-  #element;
   #destinations;
   #offers;
 
   constructor(point, destinations, offers) {
-    this.#element = null;
+    super();
     this.#point = point;
     this.#destinations = destinations;
     this.#offers = offers;
@@ -150,14 +149,23 @@ export default class EditPointView {
     return createEditPointTemplate(this.#point, this.#destinations, this.#offers);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  #submitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  };
+
+  setSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#submitHandler);
+  };
 }
