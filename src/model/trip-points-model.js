@@ -1,4 +1,4 @@
-import { CreateDestination, CreateOffersByType, CreatePoint } from './mock/data.js';
+import { CreateDestination, CreateOffersByType, CreatePoint } from '../mock/data.js';
 
 export default class TripPointsModel {
   #tripPoints;
