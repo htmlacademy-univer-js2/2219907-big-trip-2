@@ -42,13 +42,6 @@ export default class TripEventPresenter {
     render(new SortView(), this.#tripEvents);
     render(this.#pointsList, this.#tripEvents);
 
-    /*     // render(new NewPointView(this.tripPoints[0]), pointList.Element);
-    for (let i = 2; i < this.tripPoints.length; i++) {
-      this.#renderTripPoint(new PointView(this.tripPoints[i]), pointList.Element)
-      // render(new PointView(this.tripPoints[i]), pointList.Element);
-    }
-    // render(new EditPointView(this.tripPoints[1]), pointList.Element); */
-
     if (this.tripPoints.lenght === 0) {
       render(new EmptyView(), this.#pointsList);
     } else {
