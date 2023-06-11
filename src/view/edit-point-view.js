@@ -1,8 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter } from '../utils/trip.js';
 
-function createEditPointTemplate(point, destinations, offersByType) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers} = point;
+function createEditPointTemplate(tripPoint, destinations, offersByType) {
+  const {type, dateFrom, dateTo, basePrice, destination, offers} = tripPoint;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
   const pointDestination = destinations.find((dest) => dest.id === destination);
@@ -17,6 +17,8 @@ function createEditPointTemplate(point, destinations, offersByType) {
       <span class="event__offer-price">${offer.price}</span>
     </label>
   </div>`).join('');
+
+  const photos = pointDestination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('');
 
   return`
 <li class="trip-events__item">
@@ -127,6 +129,11 @@ function createEditPointTemplate(point, destinations, offersByType) {
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
         <p class="event__destination-description">${pointDestination.description}</p>
+        <div class="event__photos-container">
+          <div class="event__photos-tape">
+            ${photos}
+          </div>
+        </div>
       </section>
     </section>
   </form>
@@ -134,19 +141,19 @@ function createEditPointTemplate(point, destinations, offersByType) {
 `;}
 
 export default class EditPointView extends AbstractStatefulView {
-  #point;
+  #tripPoint;
   #destinations;
-  #offers;
+  #offersByType;
 
-  constructor(point, destinations, offers) {
+  constructor(tripPoint, destinations, offersByType) {
     super();
-    this.#point = point;
+    this.#tripPoint = tripPoint;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#offersByType = offersByType;
   }
 
   get template() {
-    return createEditPointTemplate(this.#point, this.#destinations, this.#offers);
+    return createEditPointTemplate(this.#tripPoint, this.#destinations, this.#offersByType);
   }
 
   #clickHandler = (evt) => {

@@ -27,7 +27,7 @@ const CreateDates = () => {
 };
 
 const CreatePicture = () => ({
-  'src': `http://picsum.photos/300/200?r=${GetRandomPositiveNumber(1, 1000)}`,
+  'src': `img/photos/${GetRandomPositiveNumber(1, 5)}.jpg`,
   'description': GetRandomElement(fish)
 });
 
@@ -51,7 +51,7 @@ const CreateOfferByType = (i) => ({
 
 export const CreateOffersByType = () => [...Array(OfferTypes.length).keys()].map((i) => CreateOfferByType(i));
 
-export const CreatePoint = () => {
+export function CreatePoint() {
   const dates = CreateDates();
   const pointType = GetRandomElement(OfferTypes);
   const offers = this.offersByType.find((offersType) => offersType.type === pointType).offers;
@@ -65,4 +65,4 @@ export const CreatePoint = () => {
     'offers': ShuffleArray(offers).slice(0, GetRandomPositiveNumber(1, offers.length)).map((offer) => offer.id),
     'type': pointType
   };
-};
+}

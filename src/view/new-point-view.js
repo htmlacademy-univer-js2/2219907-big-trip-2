@@ -1,16 +1,18 @@
+import dayjs from 'dayjs';
+import { remove } from '../framework/render.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter } from '../utils/trip.js';
 
-function createNewPointTemplate(point, destinations, offersByType) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers} = point;
-
+function createNewPointTemplate(destinations, offersByType) {
+  const type = 'flight';
+  const destination = 1;
   const pointOffers = offersByType.find((offer) => offer.type === type);
   const pointDestination = destinations.find((dest) => dest.id === destination);
 
   const offersTemplate = pointOffers.offers
     .map((offer) =>
       `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" ${offers.includes(offer.id) ? 'checked' : ''}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage">
     <label class="event__offer-label" for="event-offer-luggage-1">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -27,7 +29,7 @@ function createNewPointTemplate(point, destinations, offersByType) {
     <div class="event__type-wrapper">
       <label class="event__type  event__type-btn" for="event-type-toggle-1">
         <span class="visually-hidden">Choose event type</span>
-        <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+        <img class="event__type-icon" width="17" height="17" src="img/icons/flight.png" alt="Event type icon">
       </label>
       <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -97,10 +99,10 @@ function createNewPointTemplate(point, destinations, offersByType) {
 
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-1">From</label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom.format('DD/MM/YY HH:mm')}">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs().format('DD/MM/YY HH:mm')}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">To</label>
-      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo.format('DD/MM/YY HH:mm')}">
+      <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="">
     </div>
 
     <div class="event__field-group  event__field-group--price">
@@ -108,7 +110,7 @@ function createNewPointTemplate(point, destinations, offersByType) {
         <span class="visually-hidden">Price</span>
         &euro;
       </label>
-      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+      <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
     </div>
 
     <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -139,18 +141,40 @@ function createNewPointTemplate(point, destinations, offersByType) {
 `;}
 
 export default class NewPointView extends AbstractStatefulView {
-  #point;
   #destinations;
-  #offers;
+  #offersByType;
 
-  constructor(point, destinations, offers) {
+  constructor(destinations, offersByType) {
     super();
-    this.#point = point;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#offersByType = offersByType;
+    this.setClickHandler(() => {
+      this.element.querySelector('.event__reset-btn').removeEventListener('click', this.#clickHandler);
+      remove(this);
+    });
   }
 
   get template() {
-    return createNewPointTemplate(this.#point,  this.#destinations, this.#offers);
+    return createNewPointTemplate(this.#destinations, this.#offersByType);
   }
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
+
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  #changeHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.change();
+  };
+
+  setChangeHandler = (callback) => {
+    this._callback.change = callback;
+    this.element.querySelector('.event__type-toggle').addEventListener('click', this.#clickHandler);
+  };
 }

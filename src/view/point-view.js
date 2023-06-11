@@ -1,8 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter, DateDifference } from '../utils/trip.js';
 
-function createPointTemplate(point, destinations, offersByType) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = point;
+function createPointTemplate(tripPoint, destinations, offersByType) {
+  const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = tripPoint;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
   const pointDestination = destinations.find((dest) => dest.id === destination);
@@ -54,19 +54,19 @@ function createPointTemplate(point, destinations, offersByType) {
 `;}
 
 export default class PointView extends AbstractStatefulView {
-  #point;
+  #tripPoint;
   #destinations;
-  #offers;
+  #offersByType;
 
-  constructor(point, destinations, offers) {
+  constructor(tripPoint, destinations, offersByType) {
     super();
-    this.#point = point;
+    this.#tripPoint = tripPoint;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#offersByType = offersByType;
   }
 
   get template() {
-    return createPointTemplate(this.#point, this.#destinations, this.#offers);
+    return createPointTemplate(this.#tripPoint, this.#destinations, this.#offersByType);
   }
 
   #clickHandler = (evt) => {
@@ -77,5 +77,15 @@ export default class PointView extends AbstractStatefulView {
   setClickHandler = (callback) => {
     this._callback.click = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  };
+
+  setfavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   };
 }
