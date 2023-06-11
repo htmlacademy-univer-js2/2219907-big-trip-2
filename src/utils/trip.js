@@ -9,7 +9,9 @@ function CapitalizeFirstLetter(string) {
 function DateDifference(dateFrom, dateTo) {
   let dateDiff = dayjs.duration(dateTo.diff(dateFrom, 'millisecond'));
 
-  if (dateDiff.hours() > 0) {
+  if (dateDiff.days() > 0) {
+    dateDiff = dateDiff.format('DD[D] HH[H] mm[M]');
+  } else if (dateDiff.hours() > 0) {
     dateDiff = dateDiff.format('HH[H] mm[M]');
   } else {
     dateDiff = dateDiff.format('mm[M]');

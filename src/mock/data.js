@@ -21,7 +21,7 @@ let lastId = 1;
 
 const CreateDates = () => {
   const time1 = dayjs.unix(GetRandomPositiveNumber(1677610800, 1679252400)); // С 1 по 20 марта
-  const time2 = time1.add(dayjs.unix(GetRandomPositiveNumber(60 * 10, 3600 * 5))); // От 10 минут до 5 часов
+  const time2 = time1.add(dayjs.unix(GetRandomPositiveNumber(60 * 10, 3600 * 50))); // От 10 минут до 5 часов
 
   return [time1, time2];
 };
