@@ -106,4 +106,9 @@ export default class TripPointPresenter {
       this.#replaceEditToPoint();
     }
   }
+
+  removePresenter() {
+    remove(this.#tripPointComponent);
+    remove(this.#editComponent);
+  }
 }
