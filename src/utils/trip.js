@@ -23,8 +23,8 @@ function DateDifference(dateFrom, dateTo, isNumber=false) {
   return dateDiff;
 }
 
-const priceSort = (tripPoint1, tripPoint2) => tripPoint2.basePrice - tripPoint1.basePrice;
-const daySort = (tripPoint1, tripPoint2) => dayjs(tripPoint1.dateFrom).diff(dayjs(tripPoint2.dateFrom));
-const timeSort = (tripPoint1, tripPoint2) => tripPoint1.dateTo.diff(tripPoint1.dateFrom) - tripPoint2.dateTo.diff(tripPoint2.dateFrom);
+function DateFormat(date) {
+  return dayjs(date).format('DD/MM/YY hh:mm');
+}
 
-export {CapitalizeFirstLetter, DateDifference, priceSort, daySort, timeSort};
+export {CapitalizeFirstLetter, DateDifference, DateFormat};

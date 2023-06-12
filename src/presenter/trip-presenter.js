@@ -5,8 +5,7 @@ import EmptyView from '../view/empty-view.js';
 import {render, RenderPosition} from '../framework/render.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripHeaderPresenter from './trip-header-presenter.js';
-import {SortType} from '../const.js';
-import { priceSort, timeSort, daySort } from '../utils/trip.js';
+import { sortingBy, SortType } from '../utils/sort.js';
 
 
 export default class TripPresenter {
@@ -19,7 +18,7 @@ export default class TripPresenter {
   #destinations;
 
   #tripPointPresenters;
-  #currentSortType = null;
+  #currentSortType;
   #sortComponent;
 
   constructor() {
@@ -31,6 +30,7 @@ export default class TripPresenter {
     this.#tripEventsContainer = document.body.querySelector('.trip-events');
     this.#tripPointPresenters = new Map();
     this.#sortComponent = new SortView();
+    this.#currentSortType = SortType.DAY;
   }
 
   init(tripPointsModel) {
@@ -57,8 +57,7 @@ export default class TripPresenter {
 
   #renderSort() {
     render(this.#sortComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
-    this.#tripPoints.sort(daySort);
-    this.#currentSortType = SortType.DAY;
+    sortingBy[SortType.DAY](this.#tripPoints);
     this.#sortComponent.setSortTypeHandler(this.#sortTypeHandler);
   }
 
@@ -68,13 +67,15 @@ export default class TripPresenter {
 
   #renderTripPoints() {
     for (const tripPoint of this.#tripPoints) {
-      const tripPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
-      this.#tripPointPresenters.set(tripPoint.id, tripPresenter);
-      tripPresenter.init(tripPoint);
+      const tripPointPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
+      this.#tripPointPresenters.set(tripPoint.id, tripPointPresenter);
+      tripPointPresenter.init(tripPoint);
     }
   }
 
   #newPointButton() {
+    /*    const newPointTripPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
+    newPointTripPresenter.init({}); */
     const newEventButtonHandler = (evt) => {
       evt.preventDefault();
       render(new NewPointView(this.#destinations, this.#offersByType), this.#tripPointsContainer.element, RenderPosition.AFTERBEGIN);
@@ -94,17 +95,7 @@ export default class TripPresenter {
   };
 
   #sortTripPoints = (sortType) => {
-    switch (sortType) {
-      case SortType.DAY:
-        this.#tripPoints.sort(daySort);
-        break;
-      case SortType.TIME:
-        this.#tripPoints.sort(timeSort);
-        break;
-      case SortType.PRICE:
-        this.#tripPoints.sort(priceSort);
-        break;
-    }
+    sortingBy[sortType](this.#tripPoints);
     this.#currentSortType = sortType;
   };
 

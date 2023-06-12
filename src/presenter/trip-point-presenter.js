@@ -8,6 +8,7 @@ import { isEscape } from '../utils/common.js';
 const States = {
   Point: 'point',
   Edit: 'edit',
+  New: 'new',
   Null: 'null'
 };
 
@@ -24,7 +25,13 @@ export default class TripPointPresenter {
   #state = States.Null;
   #resetStates;
 
-  constructor(tripPointsContainer, destinations, offersByType, changeData, resetStates) {
+  constructor(
+    tripPointsContainer,
+    destinations,
+    offersByType,
+    changeData,
+    resetStates
+  ) {
     this.#tripPointsContainer = tripPointsContainer;
     this.#destinations = destinations;
     this.#offersByType = offersByType;
@@ -38,8 +45,16 @@ export default class TripPointPresenter {
   }
 
   #renderTripPoint() {
-    this.#editComponent = new EditPointView(this.#tripPoint, this.#destinations, this.#offersByType);
-    this.#tripPointComponent = new PointView(this.#tripPoint, this.#destinations, this.#offersByType);
+    this.#editComponent = new EditPointView(
+      this.#tripPoint,
+      this.#destinations,
+      this.#offersByType
+    );
+    this.#tripPointComponent = new PointView(
+      this.#tripPoint,
+      this.#destinations,
+      this.#offersByType
+    );
 
     this.#setPointHandlers();
     this.#setEditHandlers();
@@ -47,8 +62,7 @@ export default class TripPointPresenter {
     if (this.#prevTripPointComponent) {
       if (this.#state === States.Edit) {
         replace(this.#editComponent, this.#prevEditComponent);
-      }
-      else if (this.#state === States.Point) {
+      } else if (this.#state === States.Point) {
         replace(this.#tripPointComponent, this.#prevTripPointComponent);
       }
       remove(this.#prevEditComponent);
@@ -64,30 +78,41 @@ export default class TripPointPresenter {
   }
 
   #changeFavoriteHandler = () => {
-    const np = {...this.#tripPoint, isFavorite: !this.#tripPoint.isFavorite};
-    this.#changeData(np, this);
+    const editedPoint = {
+      ...this.#tripPoint,
+      isFavorite: !this.#tripPoint.isFavorite,
+    };
+    this.#changeData(editedPoint, this);
   };
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
       evt.preventDefault();
       this.#replaceEditToPoint();
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
+      this.#editComponent.reset(this.#tripPoint);
     }
   };
 
-  #replacePointToEdit = () => {replace(this.#editComponent, this.#tripPointComponent); this.#state = States.Edit; };
-  #replaceEditToPoint = () => {replace(this.#tripPointComponent, this.#editComponent); this.#state = States.Point;};
+  #replacePointToEdit = () => {
+    replace(this.#editComponent, this.#tripPointComponent);
+    this.#state = States.Edit;
+  };
+
+  #replaceEditToPoint = () => {
+    replace(this.#tripPointComponent, this.#editComponent);
+    this.#state = States.Point;
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
 
   #setEditHandlers = () => {
     this.#editComponent.setClickHandler(() => {
+      this.#editComponent.reset(this.#tripPoint);
       this.#replaceEditToPoint();
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
     });
 
-    this.#editComponent.setSubmitHandler(() => {
+    this.#editComponent.setSubmitHandler((tripPoint) => {
+      this.#changeData(tripPoint);
       this.#replaceEditToPoint();
-      document.removeEventListener('keydown', this.#escKeyDownHandler);
     });
   };
 
@@ -103,6 +128,7 @@ export default class TripPointPresenter {
 
   resetView() {
     if (this.#state === States.Edit) {
+      this.#editComponent.reset(this.#tripPoint);
       this.#replaceEditToPoint();
     }
   }
