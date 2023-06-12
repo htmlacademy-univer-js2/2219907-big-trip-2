@@ -175,6 +175,6 @@ export default class NewPointView extends AbstractStatefulView {
 
   setChangeHandler = (callback) => {
     this._callback.change = callback;
-    this.element.querySelector('.event__type-toggle').addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__type-toggle').addEventListener('click', this.#changeHandler);
   };
 }
