@@ -149,7 +149,7 @@ export default class EditPointView extends AbstractStatefulView {
     this._state = {...tripPoint};
     this.#destinations = destinations;
     this.#offersByType = offersByType;
-    this.#setViewHandlers();
+    this.#setEditViewHandlers();
   }
 
   get template() {
@@ -179,12 +179,12 @@ export default class EditPointView extends AbstractStatefulView {
   reset = (tripPoint) => this.updateElement({...tripPoint});
 
   _restoreHandlers = () => {
-    this.#setViewHandlers();
+    this.#setEditViewHandlers();
     this.setClickHandler(this._callback.click);
     this.setSubmitHandler(this._callback.formSubmit);
   };
 
-  #setViewHandlers = () => {
+  #setEditViewHandlers = () => {
     this.element.querySelector('.event__type-list').addEventListener('change', this.#tripPointTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#tripPointDestinationHandler);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#tripPointOffersHandler);

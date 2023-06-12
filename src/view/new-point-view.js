@@ -99,7 +99,7 @@ function createNewPointTemplate(destinations, offersByType) {
 
     <div class="event__field-group  event__field-group--time">
       <label class="visually-hidden" for="event-start-time-1">From</label>
-      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs().format('DD/MM/YY HH:mm')}">
+      <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs().format('DD/MM/YY hh:mm')}">
       &mdash;
       <label class="visually-hidden" for="event-end-time-1">To</label>
       <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="">
@@ -148,8 +148,8 @@ export default class NewPointView extends AbstractStatefulView {
     super();
     this.#destinations = destinations;
     this.#offersByType = offersByType;
-    this.setClickHandler(() => {
-      this.element.querySelector('.event__reset-btn').removeEventListener('click', this.#clickHandler);
+    this.setCancelHandler(() => {
+      this.element.querySelector('.event__reset-btn').removeEventListener('click', this.#cancelHandler);
       remove(this);
     });
   }
@@ -158,14 +158,14 @@ export default class NewPointView extends AbstractStatefulView {
     return createNewPointTemplate(this.#destinations, this.#offersByType);
   }
 
-  #clickHandler = (evt) => {
+  #cancelHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.cancel();
   };
 
-  setClickHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandler);
+  setCancelHandler = (callback) => {
+    this._callback.cancel = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#cancelHandler);
   };
 
   #changeHandler = (evt) => {
@@ -176,5 +176,41 @@ export default class NewPointView extends AbstractStatefulView {
   setChangeHandler = (callback) => {
     this._callback.change = callback;
     this.element.querySelector('.event__type-toggle').addEventListener('click', this.#changeHandler);
+  };
+
+  #setNewPointViewHandlers = () => {
+    this.element.querySelector('.event__type-list').addEventListener('change', this.#tripPointTypeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#tripPointDestinationHandler);
+    this.element.querySelector('.event__available-offers').addEventListener('change', this.#tripPointOffersHandler);
+  };
+
+  reset = (tripPoint) => this.updateElement({...tripPoint});
+
+  _restoreHandlers = () => {
+    this.#setNewPointViewHandlers();
+    this.setClickHandler(this._callback.click);
+    this.setSubmitHandler(this._callback.formSubmit);
+  };
+
+  #tripPointTypeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({type: evt.target.value, offers: []});
+  };
+
+  #tripPointDestinationHandler = (evt) => {
+    evt.preventDefault();
+    const destination = this.#destinations.find((d) => d.name === evt.target.value);
+    this.updateElement({destination: destination.id});
+  };
+
+  #tripPointOffersHandler = (evt) => {
+    evt.preventDefault();
+    const offerIdToChange = Number(evt.target.id.split('-').at(-1));
+    if (this._state.offers.includes(offerIdToChange)) {
+      this._state.offers.filter((offer) => offer !== offerIdToChange);
+    } else {
+      this._state.offers.push(offerIdToChange);
+    }
+    this.updateElement({offers: this._state.offers});
   };
 }

@@ -67,13 +67,15 @@ export default class TripPresenter {
 
   #renderTripPoints() {
     for (const tripPoint of this.#tripPoints) {
-      const tripPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
-      this.#tripPointPresenters.set(tripPoint.id, tripPresenter);
-      tripPresenter.init(tripPoint);
+      const tripPointPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
+      this.#tripPointPresenters.set(tripPoint.id, tripPointPresenter);
+      tripPointPresenter.init(tripPoint);
     }
   }
 
   #newPointButton() {
+    /*    const newPointTripPresenter = new TripPointPresenter(this.#tripPointsContainer, this.#destinations, this.#offersByType, this.#changeDataHandler, this.#resetPointPresentersHandler);
+    newPointTripPresenter.init({}); */
     const newEventButtonHandler = (evt) => {
       evt.preventDefault();
       render(new NewPointView(this.#destinations, this.#offersByType), this.#tripPointsContainer.element, RenderPosition.AFTERBEGIN);

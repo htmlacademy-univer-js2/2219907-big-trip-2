@@ -8,6 +8,7 @@ import { isEscape } from '../utils/common.js';
 const States = {
   Point: 'point',
   Edit: 'edit',
+  New: 'new',
   Null: 'null'
 };
 
