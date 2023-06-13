@@ -10,10 +10,7 @@ export default class TripPointsModel extends Observable {
     super();
     this.#tripPointsApiService = tripPointsApiService;
 
-    this.#tripPointsApiService.tripPoints.then((tripPoint) => {
-      console.log(tripPoint);
-      console.log(tripPoint.map(this.#adaptToClient));
-    });
+
   }
 
   init(tripPointsQuantity, destinations, offersByType) {
