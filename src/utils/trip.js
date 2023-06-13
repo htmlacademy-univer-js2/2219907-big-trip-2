@@ -6,12 +6,8 @@ function CapitalizeFirstLetter(string) {
   return string[0].toUpperCase() + string.slice(1);
 }
 
-function DateDifference(dateFrom, dateTo, isNumber=false) {
-  let dateDiff = dayjs.duration(dateTo.diff(dateFrom, 'millisecond'));
-
-  if (isNumber) {
-    return dateDiff;
-  }
+function DateDifference(dateFrom, dateTo) {
+  let dateDiff = dayjs.duration(dayjs(dateTo).diff(dayjs(dateFrom), 'millisecond'));
 
   if (dateDiff.days() > 0) {
     dateDiff = dateDiff.format('DD[D] HH[H] mm[M]');

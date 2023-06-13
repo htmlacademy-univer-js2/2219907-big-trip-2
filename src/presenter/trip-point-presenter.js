@@ -1,16 +1,11 @@
-import {remove, render, replace} from '../framework/render.js';
+import {remove, render, RenderPosition, replace} from '../framework/render.js';
 // import LoadingView from '../view/loading-view.js';
 
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 import { isEscape } from '../utils/common.js';
+import { UserActions, TripPointStates } from '../const.js';
 
-const States = {
-  Point: 'point',
-  Edit: 'edit',
-  New: 'new',
-  Null: 'null'
-};
 
 export default class TripPointPresenter {
   #tripPointsContainer;
@@ -22,7 +17,7 @@ export default class TripPointPresenter {
   #tripPointComponent;
   #prevEditComponent = null;
   #prevTripPointComponent = null;
-  #state = States.Null;
+  #state;
   #resetStates;
 
   constructor(
@@ -39,17 +34,33 @@ export default class TripPointPresenter {
     this.#resetStates = resetStates;
   }
 
-  init(tripPoint) {
+  init(tripPoint, state) {
+    this.#state = state;
     this.#tripPoint = tripPoint;
+    if (this.#state === TripPointStates.New) {
+      this.#renderNewTripPoint();
+      return;
+    }
     this.#renderTripPoint();
+  }
+
+  #renderNewTripPoint() {
+    this.#editComponent = new EditPointView(
+      this.#destinations,
+      this.#offersByType,
+    );
+
+    this.#setNewPointHandlers();
+    render(this.#editComponent, this.#tripPointsContainer.element, RenderPosition.AFTERBEGIN);
   }
 
   #renderTripPoint() {
     this.#editComponent = new EditPointView(
-      this.#tripPoint,
       this.#destinations,
-      this.#offersByType
+      this.#offersByType,
+      this.#tripPoint
     );
+
     this.#tripPointComponent = new PointView(
       this.#tripPoint,
       this.#destinations,
@@ -60,18 +71,18 @@ export default class TripPointPresenter {
     this.#setEditHandlers();
 
     if (this.#prevTripPointComponent) {
-      if (this.#state === States.Edit) {
+      if (this.#state === TripPointStates.Edit) {
         replace(this.#editComponent, this.#prevEditComponent);
-      } else if (this.#state === States.Point) {
+      } else if (this.#state === TripPointStates.Point) {
         replace(this.#tripPointComponent, this.#prevTripPointComponent);
       }
       remove(this.#prevEditComponent);
       remove(this.#prevTripPointComponent);
     }
 
-    if (this.#state === States.Null) {
+    if (this.#state === TripPointStates.Null) {
       render(this.#tripPointComponent, this.#tripPointsContainer.element);
-      this.#state = States.Point;
+      this.#state = TripPointStates.Point;
     }
     this.#prevEditComponent = this.#editComponent;
     this.#prevTripPointComponent = this.#tripPointComponent;
@@ -82,7 +93,7 @@ export default class TripPointPresenter {
       ...this.#tripPoint,
       isFavorite: !this.#tripPoint.isFavorite,
     };
-    this.#changeData(editedPoint, this);
+    this.#changeData(UserActions.EDIT, editedPoint);
   };
 
   #escKeyDownHandler = (evt) => {
@@ -95,13 +106,40 @@ export default class TripPointPresenter {
 
   #replacePointToEdit = () => {
     replace(this.#editComponent, this.#tripPointComponent);
-    this.#state = States.Edit;
+    this.#state = TripPointStates.Edit;
   };
 
   #replaceEditToPoint = () => {
     replace(this.#tripPointComponent, this.#editComponent);
-    this.#state = States.Point;
+    this.#state = TripPointStates.Point;
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #formCheck(tripPoint) {
+    return tripPoint.basePrice > 0 && tripPoint.destination !== -1;
+  }
+
+  #setNewPointHandlers = () => {
+    this.#editComponent.setSubmitHandler((tripPoint) => {
+      if (!this.#formCheck(tripPoint)){
+        return;
+      }
+      this.#changeData(UserActions.ADD, tripPoint);
+    });
+
+    this.#editComponent.setDeleteHandler(() => {
+      this.#resetStates(this);
+    });
+
+    document.addEventListener('keydown', this.#newPointEscKeyDownHandler);
+  };
+
+  #newPointEscKeyDownHandler = (evt) => {
+    if (isEscape(evt)) {
+      evt.preventDefault();
+      this.#resetStates(this);
+      document.removeEventListener('keydown', this.#newPointEscKeyDownHandler);
+    }
   };
 
   #setEditHandlers = () => {
@@ -111,8 +149,11 @@ export default class TripPointPresenter {
     });
 
     this.#editComponent.setSubmitHandler((tripPoint) => {
-      this.#changeData(tripPoint);
-      this.#replaceEditToPoint();
+      this.#changeData(UserActions.EDIT, tripPoint);
+    });
+
+    this.#editComponent.setDeleteHandler((tripPoint) => {
+      this.#changeData(UserActions.DELETE, tripPoint);
     });
   };
 
@@ -127,14 +168,16 @@ export default class TripPointPresenter {
   };
 
   resetView() {
-    if (this.#state === States.Edit) {
+    if (this.#state === TripPointStates.Edit) {
       this.#editComponent.reset(this.#tripPoint);
       this.#replaceEditToPoint();
     }
   }
 
-  removePresenter() {
-    remove(this.#tripPointComponent);
+  removePresenter = () => {
+    if (this.#state !== TripPointStates.New) {
+      remove(this.#tripPointComponent);
+    }
     remove(this.#editComponent);
-  }
+  };
 }

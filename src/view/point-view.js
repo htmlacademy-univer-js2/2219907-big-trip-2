@@ -1,5 +1,7 @@
+import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter, DateDifference } from '../utils/trip.js';
+import he from 'he';
 
 function createPointTemplate(tripPoint, destinations, offersByType) {
   const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = tripPoint;
@@ -20,16 +22,16 @@ function createPointTemplate(tripPoint, destinations, offersByType) {
   return `
 <li class="trip-events__item">
   <div class="event">
-    <time class="event__date" datetime="${dateFrom.format('YYYY-MM-DD')}">${dateFrom.format('MMM DD')}</time>
+    <time class="event__date" datetime="${dayjs(dateFrom).format('YYYY-MM-DD')}">${dayjs(dateFrom).format('MMM DD')}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${CapitalizeFirstLetter(type)} ${pointDestination.name}</h3>
+    <h3 class="event__title">${CapitalizeFirstLetter(type)} ${he.encode(pointDestination.name)}</h3>
     <div class="event__schedule">
       <p class="event__time">
-        <time class="event__start-time" datetime="${dateFrom}">${dateFrom.format('HH:mm')}</time>
+        <time class="event__start-time" datetime="${dayjs(dateFrom)}">${dayjs(dateFrom).format('HH:mm')}</time>
         &mdash;
-        <time class="event__end-time" datetime="${dateTo}">${dateTo.format('HH:mm')}</time>
+        <time class="event__end-time" datetime="${dayjs(dateTo)}">${dayjs(dateTo).format('HH:mm')}</time>
       </p>
       <p class="event__duration">${dateDiff}</p>
     </div>

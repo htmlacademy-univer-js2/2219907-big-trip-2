@@ -1,31 +1,35 @@
-import { CreateDestination, CreateOffersByType, CreatePoint } from '../mock/data.js';
+import Observable from '../framework/observable.js';
+import { CreatePoint } from '../mock/data.js';
 
-export default class TripPointsModel {
-  #tripPoints;
-  #destinations;
-  #offersByType;
+export default class TripPointsModel extends Observable {
+  #tripPoints = null;
 
-  constructor() {
-    this.#tripPoints = null;
-    this.#destinations = null;
-    this.#offersByType = null;
-  }
-
-  init(destinationsQuantity, tripPointsQuantity) {
-    this.#destinations = Array.from({length: destinationsQuantity}, CreateDestination);
-    this.#offersByType = CreateOffersByType();
-    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint, this).sort();
+  init(tripPointsQuantity, destinations, offersByType) {
+    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint, {offersByType: offersByType, destinations: destinations }).sort();
   }
 
   get TripPoints () {
     return this.#tripPoints;
   }
 
-  get destinations() {
-    return this.#destinations;
+  set TripPoints(tripPoints) {
+    this.#tripPoints = tripPoints;
+    this._notify();
   }
 
-  get offersByType() {
-    return this.#offersByType;
+  addTripPoint(tripPoint) {
+    this.#tripPoints.push(tripPoint);
+    this._notify();
+  }
+
+  editTripPoint(editedPoint) {
+    const i = this.#tripPoints.findIndex((item) => item.id === editedPoint.id);
+    this.#tripPoints[i] = editedPoint;
+    this._notify();
+  }
+
+  deleteTripPoint(tripPoint) {
+    this.#tripPoints = this.#tripPoints.filter((point) => point.id !== tripPoint.id);
+    this._notify();
   }
 }
