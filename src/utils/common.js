@@ -19,4 +19,4 @@ function ShuffleArray(array) {
 
 const isEscape = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
 
-export {GetRandomPositiveNumber, GetRandomElement, ShuffleArray, isEscape};
+export { GetRandomPositiveNumber, GetRandomElement, ShuffleArray, isEscape };
