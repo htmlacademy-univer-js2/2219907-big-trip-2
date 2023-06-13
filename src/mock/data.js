@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 const OfferTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const offerTitles = ['Order Uber', 'Add luggage', 'Switch to comfort', 'Rent a car', 'Add breakfast', 'Book tickets', 'Lunch in city', 'Upgrade to a business class'];
-const cityNames = ['Amsterdam', 'Chamonix', 'Geneva'];
+export const cityNames = ['Amsterdam', 'Chamonix', 'Geneva'];
 const fish = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   'Cras aliquet varius magna, non porta ligula feugiat eget.',

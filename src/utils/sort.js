@@ -10,7 +10,7 @@ const SortType = {
 
 const priceSort = (tripPoint1, tripPoint2) => tripPoint2.basePrice - tripPoint1.basePrice;
 const daySort = (tripPoint1, tripPoint2) => dayjs(tripPoint1.dateFrom).diff(dayjs(tripPoint2.dateFrom));
-const timeSort = (tripPoint1, tripPoint2) => tripPoint1.dateTo.diff(tripPoint1.dateFrom) - tripPoint2.dateTo.diff(tripPoint2.dateFrom);
+const timeSort = (tripPoint1, tripPoint2) => dayjs(tripPoint1.dateTo).diff(dayjs(tripPoint1.dateFrom)) - dayjs(tripPoint2.dateTo).diff(dayjs(tripPoint2.dateFrom));
 
 const sortingBy = {
   [SortType.DAY]: (tripPoints) => tripPoints.sort(daySort),

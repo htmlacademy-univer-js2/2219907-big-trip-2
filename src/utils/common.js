@@ -1,7 +1,3 @@
-import dayjs from 'dayjs';
-import * as duration from 'dayjs/plugin/duration';
-dayjs.extend(duration);
-
 function GetRandomPositiveNumber(min, max) {
   if (min > max || max < 0 || min < 0) {
     throw new Error('Неверный аргумент');
