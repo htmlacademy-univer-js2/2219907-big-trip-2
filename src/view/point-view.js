@@ -1,8 +1,10 @@
-import { createElement } from '../render.js';
-import { CapitalizeFirstLetter, DateDifference } from '../util.js';
+import dayjs from 'dayjs';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { CapitalizeFirstLetter, DateDifference } from '../utils/trip.js';
+import he from 'he';
 
-function createPointTemplate(point, destinations, offersByType) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = point;
+function createPointTemplate(tripPoint, destinations, offersByType) {
+  const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = tripPoint;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
   const pointDestination = destinations.find((dest) => dest.id === destination);
@@ -20,16 +22,16 @@ function createPointTemplate(point, destinations, offersByType) {
   return `
 <li class="trip-events__item">
   <div class="event">
-    <time class="event__date" datetime="${dateFrom.format('YYYY-MM-DD')}">${dateFrom.format('MMM DD')}</time>
+    <time class="event__date" datetime="${dayjs(dateFrom).format('YYYY-MM-DD')}">${dayjs(dateFrom).format('MMM DD')}</time>
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${CapitalizeFirstLetter(type)} ${pointDestination.name}</h3>
+    <h3 class="event__title">${CapitalizeFirstLetter(type)} ${he.encode(pointDestination.name)}</h3>
     <div class="event__schedule">
       <p class="event__time">
-        <time class="event__start-time" datetime="${dateFrom}">${dateFrom.format('HH:mm')}</time>
+        <time class="event__start-time" datetime="${dayjs(dateFrom)}">${dayjs(dateFrom).format('HH:mm')}</time>
         &mdash;
-        <time class="event__end-time" datetime="${dateTo}">${dateTo.format('HH:mm')}</time>
+        <time class="event__end-time" datetime="${dayjs(dateTo)}">${dayjs(dateTo).format('HH:mm')}</time>
       </p>
       <p class="event__duration">${dateDiff}</p>
     </div>
@@ -53,31 +55,39 @@ function createPointTemplate(point, destinations, offersByType) {
 </li>
 `;}
 
-export default class PointView {
-  #point;
-  #element;
+export default class PointView extends AbstractStatefulView {
+  #tripPoint;
   #destinations;
-  #offers;
+  #offersByType;
 
-  constructor(point, destinations, offers) {
-    this.#element = null;
-    this.#point = point;
+  constructor(tripPoint, destinations, offersByType) {
+    super();
+    this.#tripPoint = tripPoint;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#offersByType = offersByType;
   }
 
   get template() {
-    return createPointTemplate(this.#point, this.#destinations, this.#offers);
+    return createPointTemplate(this.#tripPoint, this.#destinations, this.#offersByType);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  };
+
+  setfavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
+  };
 }

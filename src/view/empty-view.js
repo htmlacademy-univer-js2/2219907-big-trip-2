@@ -1,28 +1,23 @@
-import { createElement } from '../render.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
-const createEmptyTemplate = () => (`
-<p class="trip-events__msg">Click New Event to create your first point</p>
+const EmptyStates = {
+  'everything': 'Click New Event to create your first point',
+  'past': 'There are no past events now',
+  'future': 'There are no future events now'
+}
+
+const createEmptyTemplate = (state) => (`
+<p class="trip-events__msg">${EmptyStates[state]}</p>
 `);
 
-export default class EmptyView {
-  #element;
-
-  constructor() {
-    this.#element = null;
-  }
+export default class EmptyView extends AbstractStatefulView {
+  #state = 'everything';
 
   get template() {
-    return createEmptyTemplate;
+    return createEmptyTemplate(this.#state);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
+  changeState(state) {
+    this.#state = state;
   }
 }
