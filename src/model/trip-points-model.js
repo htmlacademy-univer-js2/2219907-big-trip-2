@@ -1,8 +1,20 @@
+import dayjs from 'dayjs';
 import Observable from '../framework/observable.js';
 import { CreatePoint } from '../mock/data.js';
 
 export default class TripPointsModel extends Observable {
+  #tripPointsApiService = null;
   #tripPoints = null;
+
+  constructor({tripPointsApiService}) {
+    super();
+    this.#tripPointsApiService = tripPointsApiService;
+
+    this.#tripPointsApiService.tripPoints.then((tripPoint) => {
+      console.log(tripPoint);
+      console.log(tripPoint.map(this.#adaptToClient));
+    });
+  }
 
   init(tripPointsQuantity, destinations, offersByType) {
     this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint, {offersByType: offersByType, destinations: destinations }).sort();
@@ -31,5 +43,21 @@ export default class TripPointsModel extends Observable {
   deleteTripPoint(tripPoint) {
     this.#tripPoints = this.#tripPoints.filter((point) => point.id !== tripPoint.id);
     this._notify();
+  }
+
+  #adaptToClient(tripPoint) {
+    const adaptedTripPoint = {...tripPoint,
+      basePrice: tripPoint['base_price'],
+      dateFrom: dayjs(tripPoint['date_from']),
+      dateTo: dayjs(tripPoint['date_to']),
+      isFavorite: tripPoint['is_favorite'],
+    };
+
+    delete adaptedTripPoint['base_price'];
+    delete adaptedTripPoint['date_from'];
+    delete adaptedTripPoint['date_to'];
+    delete adaptedTripPoint['is_favorite'];
+
+    return adaptedTripPoint;
   }
 }
