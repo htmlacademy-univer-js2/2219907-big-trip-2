@@ -9,15 +9,14 @@ const EmptyTripPoint = {
   'basePrice': 0,
   'dateFrom': dayjs(),
   'dateTo': dayjs(),
-  'destination': -1,
-  'id': -1,
+  'destination': 1,
   'isFavorite': false,
   'offers': [],
   'type': 'flight'
 };
 
 function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoint) {
-  const {type, dateFrom, dateTo, basePrice, destination, offers} = tripPoint;
+  const {type, dateFrom, dateTo, basePrice, destination, offers, isDisabled, isDeleting, isSaving} = tripPoint;
 
   const pointOffers = offersByType.find((offer) => offer.type === type);
   let pointDestination = {name: '', description: ''};
@@ -27,11 +26,19 @@ function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoi
     photos = pointDestination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('');
   }
 
+  const destinationsTemplate = destinations.map((dest) => `<option value="${dest.name}"></option>`);
+
+  const offerTypesTemplate = offersByType.map((offer) => `
+  <div class="event__type-item">
+  <input id="event-type-${offer.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}">
+  <label class="event__type-label  event__type-label--${offer.type}" for="event-type-taxi-1">${CapitalizeFirstLetter(offer.type)}</label>
+</div>
+  `).join('');
 
   const offersTemplate = pointOffers.offers
     .map((offer) =>
       `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${offer.id}" type="checkbox" name="event-offer-luggage" ${offers.includes(offer.id) ? 'checked' : ''}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${offer.id}" type="checkbox" name="event-offer-luggage" ${offers.includes(offer.id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
     <label class="event__offer-label" for="event-offer-luggage-${offer.id}">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -48,56 +55,12 @@ function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoi
           <span class="visually-hidden">Choose event type</span>
           <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
         </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-
-            <div class="event__type-item">
-              <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-              <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-              <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-              <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-              <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-              <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-              <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-              <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-              <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-            </div>
-
-            <div class="event__type-item">
-              <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-              <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-            </div>
+            ${offerTypesTemplate}
           </fieldset>
         </div>
       </div>
@@ -106,20 +69,18 @@ function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoi
         <label class="event__label  event__type-output" for="event-destination-1">
         ${CapitalizeFirstLetter(type)}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination.name)}" list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(pointDestination.name)}" list="destination-list-1" ${isDisabled ? 'disabled' : ''}>
         <datalist id="destination-list-1">
-          <option value="Amsterdam"></option>
-          <option value="Geneva"></option>
-          <option value="Chamonix"></option>
+          ${destinationsTemplate}
         </datalist>
       </div>
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${DateFormat(dateFrom)}">
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${DateFormat(dateFrom)}" ${isDisabled ? 'disabled' : ''}>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${DateFormat(dateTo)}">
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${DateFormat(dateTo)}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -127,11 +88,11 @@ function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoi
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">${isNewPoint ? 'Cancel' : 'Delete'}</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+      <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isNewPoint ? 'Cancel' : `${isDeleting ? 'Deleting...' : 'Delete'}`}</button>
       ${isNewPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
 
     </header>
@@ -162,7 +123,8 @@ function createEditPointTemplate(tripPoint, destinations, offersByType, isNewPoi
 export default class EditPointView extends AbstractStatefulView {
   #destinations;
   #offersByType;
-  #datePicker = null;
+  #datePickerFrom = null;
+  #datePickerTo = null;
   #isNewPoint;
 
   constructor({tripPoint=EmptyTripPoint, destinations, offersByType, isNewPoint}) {
@@ -184,9 +146,14 @@ export default class EditPointView extends AbstractStatefulView {
   removeElement() {
     super.removeElement();
 
-    if (this.#datePicker) {
-      this.#datePicker.destroy();
-      this.#datePicker = null;
+    if (this.#datePickerFrom) {
+      this.#datePickerFrom.destroy();
+      this.#datePickerFrom = null;
+    }
+
+    if (this.#datePickerTo) {
+      this.#datePickerTo.destroy();
+      this.#datePickerTo = null;
     }
   }
 
@@ -207,7 +174,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #submitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#parseStateToTripPoint({...this._state, id: dayjs().unix()}));
+    this._callback.formSubmit(this.#parseStateToTripPoint(this._state));
   };
 
   setDeleteHandler = (callback) => {
@@ -224,10 +191,11 @@ export default class EditPointView extends AbstractStatefulView {
 
   _restoreHandlers = () => {
     if (!this.#isNewPoint) {
-      this.setClickHandler(this._callback.click);
+      this.setToPointClickHandler(this._callback.pointClick);
     }
     this.#setEditViewHandlers();
     this.setSubmitHandler(this._callback.formSubmit);
+    this.setDeleteHandler(this._callback.delete);
     this.#setDatePickerFrom();
     this.#setDatePickerTo();
   };
@@ -278,7 +246,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #setDatePickerFrom = () => {
     if (this._state.dateFrom) {
-      this.#datePicker = flatpickr(
+      this.#datePickerFrom = flatpickr(
         this.element.querySelector('#event-start-time-1'),
         {
           enableTime: true,
@@ -294,7 +262,7 @@ export default class EditPointView extends AbstractStatefulView {
 
   #setDatePickerTo = () => {
     if (this._state.dateTo) {
-      this.#datePicker = flatpickr(
+      this.#datePickerTo = flatpickr(
         this.element.querySelector('#event-end-time-1'),
         {
           enableTime: true,
@@ -313,7 +281,18 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState({basePrice: Number(evt.target.value)});
   };
 
-  #parseTripPointToState = (tripPoint) => ({...tripPoint, dateTo: dayjs(tripPoint.dateTo).toDate(), dateFrom: dayjs(tripPoint.dateFrom).toDate()});
+  #parseTripPointToState = (tripPoint) => ({...tripPoint,
+    dateTo: dayjs(tripPoint.dateTo).toDate(),
+    dateFrom: dayjs(tripPoint.dateFrom).toDate(),
+    isDisabled: false,
+    isDeleting: false,
+    isSaving: false});
 
-  #parseStateToTripPoint = (state) => ({...state});
+  #parseStateToTripPoint = (state) => {
+    const tripPoint = {...state};
+    delete tripPoint.isDisabled;
+    delete tripPoint.isDeleting;
+    delete tripPoint.isSaving;
+    return tripPoint;
+  };
 }

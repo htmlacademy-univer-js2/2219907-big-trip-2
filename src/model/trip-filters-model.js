@@ -10,9 +10,6 @@ export default class TripFilterModel extends Observable {
   }
 
   setFilterState(updateType, filterState) {
-    if (this.#filterState === filterState) {
-      return;
-    }
     this.#filterState = filterState;
     this._notify(updateType, filterState);
   }

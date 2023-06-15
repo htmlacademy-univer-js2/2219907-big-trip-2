@@ -6,9 +6,10 @@ import LoadingView from '../view/loading-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripNewPointPresenter from './trip-new-point-presenter.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { sortingBy, SortType } from '../utils/sort.js';
 import { filterBy, FilterStates } from '../utils/filter.js';
-import { UpdateType, UserActions } from '../const.js';
+import { TimeLimit, UpdateType, UserActions } from '../const.js';
 
 export default class TripPresenter {
   #tripEventsContainer = document.body.querySelector('.trip-events');
@@ -16,7 +17,7 @@ export default class TripPresenter {
 
   #tripPointPresenters = new Map();
   #tripPointsListComponent = new PointListView();
-  #tripNewPointPresenter = new TripNewPointPresenter(this.#tripPointsListComponent, this.#handleChangeData);
+  #tripNewPointPresenter;
   #loadingComponent = new LoadingView();
   #sortComponent = new SortView();
   #emptyComponent = new EmptyView();
@@ -32,16 +33,20 @@ export default class TripPresenter {
 
   #currentSortType = SortType.DAY;
   #isLoading = true;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel) {
     this.#tripPointsModel = tripPointsModel;
     this.#tripDestinationsModel = tripDestinationsModel;
     this.#tripOffersModel = tripOffersModel;
     this.#tripFiltersModel = tripFiltersModel;
+    this.#tripNewPointPresenter = new TripNewPointPresenter(this.#tripPointsListComponent, this.#handleChangeData);
   }
 
   init() {
-
     this.#renderTripPresenter();
   }
 
@@ -67,6 +72,10 @@ export default class TripPresenter {
     }
 
     this.#updateTripPoints();
+    if (this.#tripPoints.length === 0 && this.#tripFiltersModel.FilterState !== FilterStates.EVERYTHING) {
+      this.#tripFiltersModel.setFilterState(UpdateType.NONE, FilterStates.EVERYTHING);
+      this.#updateTripPoints();
+    }
     this.#destinations = this.#tripDestinationsModel.Destinations;
     this.#offersByType = this.#tripOffersModel.OffersByType;
 
@@ -79,8 +88,9 @@ export default class TripPresenter {
   #renderLoading = () => render(this.#loadingComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
 
   #updateTripPoints() {
+    this.#tripPoints = this.#tripPointsModel.TripPoints;
     this.#tripPoints = filterBy[this.#tripFiltersModel.FilterState](this.#tripPoints);
-    sortingBy[SortType.DAY](this.#tripPoints);
+    sortingBy[this.#currentSortType](this.#tripPoints);
   }
 
   #clearTripPresenter = ({resetSortType = false} = {}) => {
@@ -100,18 +110,18 @@ export default class TripPresenter {
     }
   };
 
-  #EmptyCheck = (filterState = FilterStates.EVERYTHING) => {
+  #EmptyCheck = () => {
     if (this.#tripPoints.length !== 0) {
       return true;
     }
     remove(this.#tripPointsListComponent);
-    this.#emptyComponent.changeState(filterState);
+    this.#emptyComponent.changeState(this.#tripFiltersModel.FilterState);
     render(this.#emptyComponent, this.#tripEventsContainer);
     return false;
   };
 
   #renderSort = () => {
-    this.#sortComponent = new SortView();
+    this.#sortComponent = new SortView(this.#currentSortType);
     this.#sortComponent.setSortTypeHandler(this.#handleSortType);
     render(this.#sortComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
   };
@@ -135,22 +145,39 @@ export default class TripPresenter {
   }
 
   #handleStateChange = () => {
-    // this.#tripNewPointPresenter.destroy();
+    this.#tripNewPointPresenter.destroy();
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #handleChangeData = (userAction, updateType, tripPoint) => {
+  #handleChangeData = async (userAction, updateType, tripPoint) => {
+    this.#uiBlocker.block();
     switch (userAction) {
       case UserActions.ADD:
-        this.#tripPointsModel.addTripPoint(updateType, tripPoint);
+        this.#tripNewPointPresenter.setSaving();
+        try {
+          await this.#tripPointsModel.addTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripNewPointPresenter.setAborting();
+        }
         break;
       case UserActions.EDIT:
-        this.#tripPointsModel.editTripPoint(updateType, tripPoint);
+        this.#tripPointPresenters.get(tripPoint.id).setSaving();
+        try {
+          await this.#tripPointsModel.editTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripPointPresenters.get(tripPoint.id).setAborting();
+        }
         break;
       case UserActions.DELETE:
-        this.#tripPointsModel.deleteTripPoint(updateType, tripPoint);
+        this.#tripPointPresenters.get(tripPoint.id).setDeleting();
+        try {
+          await this.#tripPointsModel.deleteTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripPointPresenters.get(tripPoint.id).setAborting();
+        }
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   handleModelEvent = (updateType, data) => {

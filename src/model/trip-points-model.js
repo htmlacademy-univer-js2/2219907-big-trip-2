@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
 
@@ -6,7 +5,7 @@ export default class TripPointsModel extends Observable {
   #tripPointsApiService = null;
   #tripPoints = [];
 
-  constructor({tripPointsApiService}) {
+  constructor(tripPointsApiService) {
     super();
     this.#tripPointsApiService = tripPointsApiService;
   }
@@ -30,9 +29,15 @@ export default class TripPointsModel extends Observable {
     this._notify();
   }
 
-  addTripPoint(updateType, tripPoint) {
-    this.#tripPoints.push(tripPoint);
-    this._notify(updateType, tripPoint);
+  async addTripPoint(updateType, updatePoint) {
+    try{
+      const response = await this.#tripPointsApiService.addTripPoint(updatePoint);
+      const updatedPoint = this.#adaptToClient(response);
+      this.#tripPoints.push(updatedPoint);
+      this._notify(updateType, updatedPoint);
+    } catch(err) {
+      throw new Error('Can\'t add trip point');
+    }
   }
 
   async editTripPoint(updateType, updatePoint) {
@@ -53,16 +58,21 @@ export default class TripPointsModel extends Observable {
 
   }
 
-  deleteTripPoint(updateType, tripPoint) {
-    this.#tripPoints = this.#tripPoints.filter((point) => point.id !== tripPoint.id);
-    this._notify(updateType);
+  async deleteTripPoint(updateType, updatePoint) {
+    try {
+      await this.#tripPointsApiService.deleteTripPoint(updatePoint);
+      this.#tripPoints = this.#tripPoints.filter((point) => point.id !== updatePoint.id);
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete trip point');
+    }
   }
 
   #adaptToClient(tripPoint) {
     const adaptedTripPoint = {...tripPoint,
       basePrice: tripPoint['base_price'],
-      dateFrom: dayjs(tripPoint['date_from']),
-      dateTo: dayjs(tripPoint['date_to']),
+      dateFrom: new Date(tripPoint['date_from']),
+      dateTo: new Date(tripPoint['date_to']),
       isFavorite: tripPoint['is_favorite'],
     };
 

@@ -4,8 +4,6 @@ export default class TripDestinationsModel {
 
   constructor(destinationsApiService) {
     this.#destinationsApiService = destinationsApiService;
-
-    this.#destinations = this.#destinationsApiService.destinations;
   }
 
   get Destinations() {

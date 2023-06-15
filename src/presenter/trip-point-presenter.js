@@ -1,7 +1,7 @@
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
-import { isEscape } from '../utils/common.js';
+import { isEscape } from '../utils/trip.js';
 import { UserActions, TripPointStates, UpdateType } from '../const.js';
 import { remove, render, replace } from '../framework/render.js';
 
@@ -34,23 +34,63 @@ export default class TripPointPresenter {
     const prevEditComponent = this.#editComponent;
 
     this.#tripPointComponent = new PointView(this.#tripPoint, this.#destinations, this.#offersByType);
-    this.#editComponent = new EditPointView(this.#tripPoint, this.#destinations,this.#offersByType, false);
+    this.#editComponent = new EditPointView({
+      tripPoint: this.#tripPoint,
+      destinations: this.#destinations,
+      offersByType: this.#offersByType,
+      isNewPoint: false});
 
     this.#setPointHandlers();
 
     if (prevTripPointComponent === null) {
-      render(this.#tripPointComponent, this.#tripPointsListComponent);
+      render(this.#tripPointComponent, this.#tripPointsListComponent.element);
       return;
     }
 
     if (this.#state === TripPointStates.Point) {
       replace(this.#tripPointComponent, prevTripPointComponent);
     } else if ( this.#state === TripPointStates.Edit)  {
-      replace(this.#editComponent, prevEditComponent);
+      replace(this.#tripPointComponent, prevEditComponent);
+      this.#state = TripPointStates.Point;
     }
 
     remove(prevTripPointComponent);
     remove(prevEditComponent);
+  }
+
+  setSaving() {
+    if (this.#state === TripPointStates.Edit) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#state === TripPointStates.Edit) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#state === TripPointStates.Point) {
+      this.#tripPointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#editComponent.shake(resetFormState);
   }
 
   #setPointHandlers = () => {

@@ -4,8 +4,6 @@ export default class TripOffersModel {
 
   constructor(offersApiService) {
     this.#offersApiService = offersApiService;
-
-    this.#offersByType = this.#offersApiService.offers;
   }
 
   get OffersByType() {
