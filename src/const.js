@@ -14,6 +14,8 @@ const TripPointStates = {
 const ApiMethod = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
 const UpdateType = {
@@ -23,6 +25,9 @@ const UpdateType = {
   INIT: 'INIT',
 };
 
-const OfferTypes = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
-export {UserActions, TripPointStates, ApiMethod, OfferTypes, UpdateType};
+export {UserActions, TripPointStates, ApiMethod, UpdateType, TimeLimit};

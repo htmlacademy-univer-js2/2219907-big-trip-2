@@ -23,4 +23,6 @@ function DateFormat(date) {
   return dayjs(date).format('DD/MM/YY HH:mm');
 }
 
-export {CapitalizeFirstLetter, DateDifference, DateFormat};
+const isEscape = (evt) => evt.key === 'Escape' || evt.key === 'Esc';
+
+export {CapitalizeFirstLetter, DateDifference, DateFormat, isEscape};

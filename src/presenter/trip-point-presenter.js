@@ -1,7 +1,7 @@
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
-import { isEscape } from '../utils/common.js';
+import { isEscape } from '../utils/trip.js';
 import { UserActions, TripPointStates, UpdateType } from '../const.js';
 import { remove, render, replace } from '../framework/render.js';
 
@@ -51,6 +51,41 @@ export default class TripPointPresenter {
 
     remove(prevTripPointComponent);
     remove(prevEditComponent);
+  }
+
+  setSaving() {
+    if (this.#state === TripPointStates.Edit) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#state === TripPointStates.Edit) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#state === TripPointStates.Point) {
+      this.#tripPointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#editComponent.shake(resetFormState);
   }
 
   #setPointHandlers = () => {

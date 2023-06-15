@@ -6,9 +6,10 @@ import LoadingView from '../view/loading-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import TripNewPointPresenter from './trip-new-point-presenter.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { sortingBy, SortType } from '../utils/sort.js';
 import { filterBy, FilterStates } from '../utils/filter.js';
-import { UpdateType, UserActions } from '../const.js';
+import { TimeLimit, UpdateType, UserActions } from '../const.js';
 
 export default class TripPresenter {
   #tripEventsContainer = document.body.querySelector('.trip-events');
@@ -32,6 +33,10 @@ export default class TripPresenter {
 
   #currentSortType = SortType.DAY;
   #isLoading = true;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel) {
     this.#tripPointsModel = tripPointsModel;
@@ -139,18 +144,35 @@ export default class TripPresenter {
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #handleChangeData = (userAction, updateType, tripPoint) => {
+  #handleChangeData = async (userAction, updateType, tripPoint) => {
+    this.#uiBlocker.block();
     switch (userAction) {
       case UserActions.ADD:
-        this.#tripPointsModel.addTripPoint(updateType, tripPoint);
+        this.#tripPointPresenters.get(tripPoint.id).setSaving();
+        try {
+          await this.#tripPointsModel.addTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripPointPresenters.get(tripPoint.id).setAborting();
+        }
         break;
       case UserActions.EDIT:
-        this.#tripPointsModel.editTripPoint(updateType, tripPoint);
+        this.#tripNewPointPresenter.setSaving();
+        try {
+          await this.#tripPointsModel.editTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripNewPointPresenter.setAborting();
+        }
         break;
       case UserActions.DELETE:
-        this.#tripPointsModel.deleteTripPoint(updateType, tripPoint);
+        this.#tripPointPresenters.get(tripPoint.id).setDeleting();
+        try {
+          await this.#tripPointsModel.deleteTripPoint(updateType, tripPoint);
+        } catch(err) {
+          this.#tripPointPresenters.get(tripPoint.id).setAborting();
+        }
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   handleModelEvent = (updateType, data) => {
