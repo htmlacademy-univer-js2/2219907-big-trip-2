@@ -34,19 +34,24 @@ export default class TripPointPresenter {
     const prevEditComponent = this.#editComponent;
 
     this.#tripPointComponent = new PointView(this.#tripPoint, this.#destinations, this.#offersByType);
-    this.#editComponent = new EditPointView(this.#tripPoint, this.#destinations,this.#offersByType, false);
+    this.#editComponent = new EditPointView({
+      tripPoint: this.#tripPoint,
+      destinations: this.#destinations,
+      offersByType: this.#offersByType,
+      isNewPoint: false});
 
     this.#setPointHandlers();
 
     if (prevTripPointComponent === null) {
-      render(this.#tripPointComponent, this.#tripPointsListComponent);
+      render(this.#tripPointComponent, this.#tripPointsListComponent.element);
       return;
     }
 
     if (this.#state === TripPointStates.Point) {
       replace(this.#tripPointComponent, prevTripPointComponent);
     } else if ( this.#state === TripPointStates.Edit)  {
-      replace(this.#editComponent, prevEditComponent);
+      replace(this.#tripPointComponent, prevEditComponent);
+      this.#state = TripPointStates.Point;
     }
 
     remove(prevTripPointComponent);

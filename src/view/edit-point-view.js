@@ -9,7 +9,7 @@ const EmptyTripPoint = {
   'basePrice': 0,
   'dateFrom': dayjs(),
   'dateTo': dayjs(),
-  'destination': -1,
+  'destination': 1,
   'isFavorite': false,
   'offers': [],
   'type': 'flight'
@@ -191,10 +191,11 @@ export default class EditPointView extends AbstractStatefulView {
 
   _restoreHandlers = () => {
     if (!this.#isNewPoint) {
-      this.setClickHandler(this._callback.click);
+      this.setToPointClickHandler(this._callback.pointClick);
     }
     this.#setEditViewHandlers();
     this.setSubmitHandler(this._callback.formSubmit);
+    this.setDeleteHandler(this._callback.delete);
     this.#setDatePickerFrom();
     this.#setDatePickerTo();
   };

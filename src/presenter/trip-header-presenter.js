@@ -30,10 +30,11 @@ export default class TripHeaderPresenter {
 
   totalPriceHandler = () => {
     let totalPrice = 0;
-    const allOffers = this.#tripOffersModel.OffersByType.map((offerByType) => offerByType.offers);
+    const allOffers = this.#tripOffersModel.OffersByType.map((offerByType) => [offerByType.type, offerByType.offers]);
     for (const tripPoint of this.#tripPointsModel.TripPoints) {
       totalPrice += tripPoint.basePrice;
-      totalPrice += allOffers.filter((offer) => offer.id in tripPoint.offers).reduce((total, curOffer) => total + curOffer.price);
+      const offerOfType =  allOffers.filter((offer) => offer[0] === tripPoint.type)[0][1];
+      totalPrice = offerOfType.filter((offer) => offer.id in tripPoint.offers).reduce((total, curOffer) => total + curOffer.price, totalPrice);
     }
 
     this.#tripInfoComponent.changeTotalPrice(totalPrice);

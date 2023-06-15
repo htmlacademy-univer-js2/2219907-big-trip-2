@@ -17,7 +17,7 @@ export default class TripPresenter {
 
   #tripPointPresenters = new Map();
   #tripPointsListComponent = new PointListView();
-  #tripNewPointPresenter = new TripNewPointPresenter(this.#tripPointsListComponent, this.#handleChangeData);
+  #tripNewPointPresenter;
   #loadingComponent = new LoadingView();
   #sortComponent = new SortView();
   #emptyComponent = new EmptyView();
@@ -43,10 +43,10 @@ export default class TripPresenter {
     this.#tripDestinationsModel = tripDestinationsModel;
     this.#tripOffersModel = tripOffersModel;
     this.#tripFiltersModel = tripFiltersModel;
+    this.#tripNewPointPresenter = new TripNewPointPresenter(this.#tripPointsListComponent, this.#handleChangeData);
   }
 
   init() {
-
     this.#renderTripPresenter();
   }
 
@@ -84,8 +84,9 @@ export default class TripPresenter {
   #renderLoading = () => render(this.#loadingComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
 
   #updateTripPoints() {
+    this.#tripPoints = this.#tripPointsModel.TripPoints;
     this.#tripPoints = filterBy[this.#tripFiltersModel.FilterState](this.#tripPoints);
-    sortingBy[SortType.DAY](this.#tripPoints);
+    sortingBy[this.#currentSortType](this.#tripPoints);
   }
 
   #clearTripPresenter = ({resetSortType = false} = {}) => {
@@ -116,7 +117,7 @@ export default class TripPresenter {
   };
 
   #renderSort = () => {
-    this.#sortComponent = new SortView();
+    this.#sortComponent = new SortView(this.#currentSortType);
     this.#sortComponent.setSortTypeHandler(this.#handleSortType);
     render(this.#sortComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
   };
@@ -140,7 +141,7 @@ export default class TripPresenter {
   }
 
   #handleStateChange = () => {
-    // this.#tripNewPointPresenter.destroy();
+    this.#tripNewPointPresenter.destroy();
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
   };
 
@@ -148,19 +149,19 @@ export default class TripPresenter {
     this.#uiBlocker.block();
     switch (userAction) {
       case UserActions.ADD:
-        this.#tripPointPresenters.get(tripPoint.id).setSaving();
+        this.#tripNewPointPresenter.setSaving();
         try {
           await this.#tripPointsModel.addTripPoint(updateType, tripPoint);
         } catch(err) {
-          this.#tripPointPresenters.get(tripPoint.id).setAborting();
+          this.#tripNewPointPresenter.setAborting();
         }
         break;
       case UserActions.EDIT:
-        this.#tripNewPointPresenter.setSaving();
+        this.#tripPointPresenters.get(tripPoint.id).setSaving();
         try {
           await this.#tripPointsModel.editTripPoint(updateType, tripPoint);
         } catch(err) {
-          this.#tripNewPointPresenter.setAborting();
+          this.#tripPointPresenters.get(tripPoint.id).setAborting();
         }
         break;
       case UserActions.DELETE:

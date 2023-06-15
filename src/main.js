@@ -11,7 +11,7 @@ import TripPointsApiService from './api-service/trip-points-api-service.js';
 import DestinationsApiService from './api-service/destinations-api-service.js';
 import OffersApiService from './api-service/offers-api-service.js';
 
-const AUTHORIZATION = 'Basic 3cdher6jpen0n8fl';
+const AUTHORIZATION = 'Basic 3cdher6jpen0n83l';
 const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
 
@@ -22,14 +22,19 @@ const tripDestinationsModel = new TripDestinationsModel(new DestinationsApiServi
 const tripOffersModel = new TripOffersModel(new OffersApiService(END_POINT, AUTHORIZATION));
 const tripFiltersModel = new TripFiltersModel();
 
-const tripPresenter = new TripPresenter();
+const tripPresenter = new TripPresenter(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel);
 const tripHeaderPresenter = new TripHeaderPresenter(tripPointsModel, tripOffersModel);
-const tripFiltersPresenter = new TripFiltersPresenter();
+const tripFiltersPresenter = new TripFiltersPresenter(tripFiltersModel);
 
-tripPresenter.init(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel);
+tripPresenter.init();
 tripHeaderPresenter.init();
-tripFiltersPresenter.init(tripFiltersModel);
+tripFiltersPresenter.init();
 
 tripFiltersModel.addObserver(tripPresenter.handleModelEvent);
 tripPointsModel.addObserver(tripPresenter.handleModelEvent);
-tripPointsModel.init();
+
+tripOffersModel.init().finally(() => {
+  tripDestinationsModel.init().finally(() => {
+    tripPointsModel.init().finally();
+  });
+});
