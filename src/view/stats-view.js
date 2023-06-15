@@ -1,4 +1,4 @@
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createStatisticsTemplate = () => (`
 <section class="statistics">
@@ -16,7 +16,7 @@ const createStatisticsTemplate = () => (`
 </section>
 `);
 
-export default class StatsView extends AbstractStatefulView {
+export default class StatsView extends AbstractView {
   get template() {
     return createStatisticsTemplate;
   }

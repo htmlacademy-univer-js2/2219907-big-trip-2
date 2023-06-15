@@ -1,36 +1,23 @@
-import {render} from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
-
+import {render} from '../framework/render.js';
+import { UpdateType } from '../const.js';
 
 export default class TripFiltersPresenter {
-  #tripMain;
-  #filtersContainer;
-  #tripFiltersModel;
-  #filterComponent;
+  #filtersContainer = document.body.querySelector('.trip-controls__filters');
 
-  constructor() {
-    this.#tripMain = document.body.querySelector('.trip-main');
-    this.#filtersContainer = this.#tripMain.querySelector('.trip-controls__filters');
-  }
+  #tripFiltersModel = null;
+  #filterComponent = new FilterView();
 
-  init(tripFiltersModel) {
+  constructor(tripFiltersModel) {
     this.#tripFiltersModel = tripFiltersModel;
-    this.#filterComponent = new FilterView();
-    this.#setChangeFilterHandler();
-    this.#renderFilters();
   }
 
-  #renderFilters() {
+  init() {
+    this.#filterComponent.setFilterChangeHandler(this.#handleFilterChange);
     render(this.#filterComponent, this.#filtersContainer);
   }
 
-  #changeFilter(newFilterState) {
-    this.#tripFiltersModel.setFilterState(newFilterState);
-  }
-
-  #setChangeFilterHandler() {
-    this.#filterComponent.setFilterChangeHandler((filterState) => {
-      this.#changeFilter(filterState);
-    });
-  }
+  #handleFilterChange = (filterState) => {
+    this.#tripFiltersModel.setFilterState(UpdateType.MAJOR, filterState);
+  };
 }

@@ -1,20 +1,24 @@
 import dayjs from 'dayjs';
+import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
-import { CreatePoint } from '../mock/data.js';
 
 export default class TripPointsModel extends Observable {
   #tripPointsApiService = null;
-  #tripPoints = null;
+  #tripPoints = [];
 
   constructor({tripPointsApiService}) {
     super();
     this.#tripPointsApiService = tripPointsApiService;
-
-
   }
 
-  init(tripPointsQuantity, destinations, offersByType) {
-    this.#tripPoints = Array.from({length: tripPointsQuantity}, CreatePoint, {offersByType: offersByType, destinations: destinations }).sort();
+  async init() {
+    try {
+      const tripPoints = await this.#tripPointsApiService.tripPoints;
+      this.#tripPoints = tripPoints.map(this.#adaptToClient);
+    } catch(err) {
+      this.#tripPoints = [];
+    }
+    this._notify(UpdateType.INIT);
   }
 
   get TripPoints () {
@@ -26,20 +30,32 @@ export default class TripPointsModel extends Observable {
     this._notify();
   }
 
-  addTripPoint(tripPoint) {
+  addTripPoint(updateType, tripPoint) {
     this.#tripPoints.push(tripPoint);
-    this._notify();
+    this._notify(updateType, tripPoint);
   }
 
-  editTripPoint(editedPoint) {
-    const i = this.#tripPoints.findIndex((item) => item.id === editedPoint.id);
-    this.#tripPoints[i] = editedPoint;
-    this._notify();
+  async editTripPoint(updateType, updatePoint) {
+    const i = this.#tripPoints.findIndex((item) => item.id === updatePoint.id);
+
+    if (i === -1) {
+      throw new Error('Can\'t edit unexisting trip point');
+    }
+
+    try {
+      const responce = await this.#tripPointsApiService.updateTripPoint(updatePoint);
+      const updatedPoint = this.#adaptToClient(responce);
+      this.#tripPoints[i] = updatedPoint;
+      this._notify(updateType, updatedPoint);
+    } catch(err) {
+      throw new Error('Can\'t edit trip point');
+    }
+
   }
 
-  deleteTripPoint(tripPoint) {
+  deleteTripPoint(updateType, tripPoint) {
     this.#tripPoints = this.#tripPoints.filter((point) => point.id !== tripPoint.id);
-    this._notify();
+    this._notify(updateType);
   }
 
   #adaptToClient(tripPoint) {
