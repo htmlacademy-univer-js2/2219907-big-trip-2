@@ -3,7 +3,6 @@ import { CapitalizeFirstLetter, DateFormat } from '../utils/trip.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
-import { cityNames } from '../mock/data.js';
 import he from 'he';
 
 const EmptyTripPoint = {
@@ -166,12 +165,13 @@ export default class EditPointView extends AbstractStatefulView {
   #datePicker = null;
   #isNewPoint;
 
-  constructor(destinations, offersByType, tripPoint=EmptyTripPoint) {
+  constructor({tripPoint=EmptyTripPoint, destinations, offersByType, isNewPoint}) {
     super();
-    this.#isNewPoint = tripPoint.id === -1;
     this._state = this.#parseTripPointToState(tripPoint);
     this.#destinations = destinations;
     this.#offersByType = offersByType;
+    this.#isNewPoint = isNewPoint;
+
     this.#setEditViewHandlers();
     this.#setDatePickerFrom();
     this.#setDatePickerTo();
@@ -190,19 +190,14 @@ export default class EditPointView extends AbstractStatefulView {
     }
   }
 
-  #clickHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.click();
+  setToPointClickHandler = (callback) => {
+    this._callback.pointClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#toPointclickHandler);
   };
 
-  setClickHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
-  };
-
-  #submitHandler = (evt) => {
+  #toPointclickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#parseStateToTripPoint({...this._state, id: dayjs().unix()}));
+    this._callback.pointClick();
   };
 
   setSubmitHandler = (callback) => {
@@ -210,14 +205,19 @@ export default class EditPointView extends AbstractStatefulView {
     this.element.querySelector('.event__save-btn').addEventListener('click', this.#submitHandler);
   };
 
-  #deleteHandler = (evt) => {
+  #submitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.delete(this.#parseStateToTripPoint(this._state));
+    this._callback.formSubmit(this.#parseStateToTripPoint({...this._state, id: dayjs().unix()}));
   };
 
   setDeleteHandler = (callback) => {
     this._callback.delete = callback;
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteHandler);
+  };
+
+  #deleteHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.delete(this.#parseStateToTripPoint(this._state));
   };
 
   reset = (tripPoint) => this.updateElement(this.#parseTripPointToState(tripPoint));
@@ -245,7 +245,7 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #tripPointDestinationHandler = (evt) => {
-    if(!cityNames.includes(evt.target.value)) {
+    if(!this.#destinations.map((dest) => dest.name).includes(evt.target.value)) {
       return;
     }
     evt.preventDefault();

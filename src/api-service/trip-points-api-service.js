@@ -1,10 +1,6 @@
 import dayjs from 'dayjs';
+import { ApiMethod } from '../const.js';
 import ApiService from '../framework/api-service.js';
-
-const Method = {
-  GET: 'GET',
-  PUT: 'PUT',
-};
 
 export default class TripPointsApiService extends ApiService {
   get tripPoints() {
@@ -15,7 +11,7 @@ export default class TripPointsApiService extends ApiService {
   async updateTripPoint(tripPoint) {
     const response = await this._load({
       url: `points/${tripPoint.id}`,
-      method: Method.PUT,
+      method: ApiMethod.PUT,
       body: JSON.stringify(this.#adaptToServer(tripPoint)),
       headers: new Headers({'Content-Type': 'application/json'}),
     });

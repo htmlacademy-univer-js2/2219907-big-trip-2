@@ -1,4 +1,4 @@
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createFilterTemplate = () => (`
 <form class="trip-filters" action="#" method="get">
@@ -18,7 +18,7 @@ const createFilterTemplate = () => (`
 </form>
 `);
 
-export default class FilterView extends AbstractStatefulView {
+export default class FilterView extends AbstractView {
   get template() {
     return createFilterTemplate;
   }

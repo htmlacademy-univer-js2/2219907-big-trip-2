@@ -1,112 +1,99 @@
-import {remove, render, RenderPosition, replace} from '../framework/render.js';
-// import LoadingView from '../view/loading-view.js';
-
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
-import { isEscape } from '../utils/common.js';
-import { UserActions, TripPointStates } from '../const.js';
 
+import { isEscape } from '../utils/common.js';
+import { UserActions, TripPointStates, UpdateType } from '../const.js';
+import { remove, render, replace } from '../framework/render.js';
 
 export default class TripPointPresenter {
-  #tripPointsContainer;
-  #offersByType;
-  #destinations;
-  #tripPoint;
-  #changeData;
-  #editComponent;
-  #tripPointComponent;
-  #prevEditComponent = null;
-  #prevTripPointComponent = null;
-  #state;
-  #resetStates;
+  #tripPointsListComponent;
 
-  constructor(
-    tripPointsContainer,
-    destinations,
-    offersByType,
-    changeData,
-    resetStates
-  ) {
-    this.#tripPointsContainer = tripPointsContainer;
+  #tripPoint = null;
+  #destinations;
+  #offersByType;
+
+  #tripPointComponent = null;
+  #editComponent = null;
+
+  #handleChangeData;
+  #handleChangeState;
+  #state = TripPointStates.Point;
+
+  constructor(tripPointsListComponent, destinations, offersByType, changeData, changeState) {
+    this.#tripPointsListComponent = tripPointsListComponent;
     this.#destinations = destinations;
     this.#offersByType = offersByType;
-    this.#changeData = changeData;
-    this.#resetStates = resetStates;
+    this.#handleChangeData = changeData;
+    this.#handleChangeState = changeState;
   }
 
-  init(tripPoint, state) {
-    this.#state = state;
+  init(tripPoint) {
     this.#tripPoint = tripPoint;
-    if (this.#state === TripPointStates.New) {
-      this.#renderNewTripPoint();
-      return;
-    }
-    this.#renderTripPoint();
-  }
 
-  #renderNewTripPoint() {
-    this.#editComponent = new EditPointView(
-      this.#destinations,
-      this.#offersByType,
-    );
+    const prevTripPointComponent = this.#tripPointComponent;
+    const prevEditComponent = this.#editComponent;
 
-    this.#setNewPointHandlers();
-    render(this.#editComponent, this.#tripPointsContainer.element, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderTripPoint() {
-    this.#editComponent = new EditPointView(
-      this.#destinations,
-      this.#offersByType,
-      this.#tripPoint
-    );
-
-    this.#tripPointComponent = new PointView(
-      this.#tripPoint,
-      this.#destinations,
-      this.#offersByType
-    );
+    this.#tripPointComponent = new PointView(this.#tripPoint, this.#destinations, this.#offersByType);
+    this.#editComponent = new EditPointView(this.#tripPoint, this.#destinations,this.#offersByType, false);
 
     this.#setPointHandlers();
-    this.#setEditHandlers();
 
-    if (this.#prevTripPointComponent) {
-      if (this.#state === TripPointStates.Edit) {
-        replace(this.#editComponent, this.#prevEditComponent);
-      } else if (this.#state === TripPointStates.Point) {
-        replace(this.#tripPointComponent, this.#prevTripPointComponent);
-      }
-      remove(this.#prevEditComponent);
-      remove(this.#prevTripPointComponent);
+    if (prevTripPointComponent === null) {
+      render(this.#tripPointComponent, this.#tripPointsListComponent);
+      return;
     }
 
-    if (this.#state === TripPointStates.Null) {
-      render(this.#tripPointComponent, this.#tripPointsContainer.element);
-      this.#state = TripPointStates.Point;
+    if (this.#state === TripPointStates.Point) {
+      replace(this.#tripPointComponent, prevTripPointComponent);
+    } else if ( this.#state === TripPointStates.Edit)  {
+      replace(this.#editComponent, prevEditComponent);
     }
-    this.#prevEditComponent = this.#editComponent;
-    this.#prevTripPointComponent = this.#tripPointComponent;
+
+    remove(prevTripPointComponent);
+    remove(prevEditComponent);
   }
+
+  #setPointHandlers = () => {
+    this.#tripPointComponent.setToEditClickHandler(this.#handleToEditClick);
+    this.#tripPointComponent.setfavoriteClickHandler(this.#changeFavoriteHandler);
+    this.#editComponent.setToPointClickHandler(this.#handleToPointClick);
+    this.#editComponent.setSubmitHandler(this.#handleSubmitClick);
+    this.#editComponent.setDeleteHandler(this.#handleDeleteClick);
+  };
+
+  #handleToEditClick = () => {
+    replace(this.#editComponent, this.#tripPointComponent);
+    this.#handleChangeState();
+    this.#state = TripPointStates.Edit;
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  };
 
   #changeFavoriteHandler = () => {
     const editedPoint = {
       ...this.#tripPoint,
       isFavorite: !this.#tripPoint.isFavorite,
     };
-    this.#changeData(UserActions.EDIT, editedPoint);
+    this.#handleChangeData(UserActions.EDIT, UpdateType.PATCH, editedPoint);
+  };
+
+  #handleToPointClick = () => {
+    this.resetView();
+  };
+
+  #handleSubmitClick = (tripPoint) => {
+    this.#handleChangeData(UserActions.EDIT, UpdateType.MINOR, tripPoint);
+    this.#replaceEditToPoint();
+  };
+
+  #handleDeleteClick = (tripPoint) => {
+    this.#handleChangeData(UserActions.DELETE, UpdateType.MINOR, tripPoint);
   };
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
       evt.preventDefault();
-      this.#replaceEditToPoint();
-      this.#editComponent.reset(this.#tripPoint);
+      this.resetView();
     }
-  };
-
-  #replacePointToEdit = () => {
-    replace(this.#editComponent, this.#tripPointComponent);
-    this.#state = TripPointStates.Edit;
   };
 
   #replaceEditToPoint = () => {
@@ -115,69 +102,15 @@ export default class TripPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #formCheck(tripPoint) {
-    return tripPoint.basePrice > 0 && tripPoint.destination !== -1;
-  }
-
-  #setNewPointHandlers = () => {
-    this.#editComponent.setSubmitHandler((tripPoint) => {
-      if (!this.#formCheck(tripPoint)){
-        return;
-      }
-      this.#changeData(UserActions.ADD, tripPoint);
-    });
-
-    this.#editComponent.setDeleteHandler(() => {
-      this.#resetStates(this);
-    });
-
-    document.addEventListener('keydown', this.#newPointEscKeyDownHandler);
-  };
-
-  #newPointEscKeyDownHandler = (evt) => {
-    if (isEscape(evt)) {
-      evt.preventDefault();
-      this.#resetStates(this);
-      document.removeEventListener('keydown', this.#newPointEscKeyDownHandler);
-    }
-  };
-
-  #setEditHandlers = () => {
-    this.#editComponent.setClickHandler(() => {
-      this.#editComponent.reset(this.#tripPoint);
-      this.#replaceEditToPoint();
-    });
-
-    this.#editComponent.setSubmitHandler((tripPoint) => {
-      this.#changeData(UserActions.EDIT, tripPoint);
-    });
-
-    this.#editComponent.setDeleteHandler((tripPoint) => {
-      this.#changeData(UserActions.DELETE, tripPoint);
-    });
-  };
-
-  #setPointHandlers = () => {
-    this.#tripPointComponent.setClickHandler(() => {
-      this.#resetStates();
-      this.#replacePointToEdit();
-      document.addEventListener('keydown', this.#escKeyDownHandler);
-    });
-
-    this.#tripPointComponent.setfavoriteClickHandler(this.#changeFavoriteHandler);
-  };
-
-  resetView() {
-    if (this.#state === TripPointStates.Edit) {
+  resetView = () => {
+    if (this.#state !== TripPointStates.Point) {
       this.#editComponent.reset(this.#tripPoint);
       this.#replaceEditToPoint();
     }
-  }
+  };
 
-  removePresenter = () => {
-    if (this.#state !== TripPointStates.New) {
-      remove(this.#tripPointComponent);
-    }
+  destroy = () => {
+    remove(this.#tripPointComponent);
     remove(this.#editComponent);
   };
 }

@@ -1,14 +1,11 @@
-import { CreateDestination } from '../mock/data.js';
-
 export default class TripDestinationsModel {
-  #destinations;
+  #destinationsApiService = null;
+  #destinations = null;
 
-  constructor() {
-    this.#destinations = null;
-  }
+  constructor(destinationsApiService) {
+    this.#destinationsApiService = destinationsApiService;
 
-  init(destinationsQuantity) {
-    this.#destinations = Array.from({length: destinationsQuantity}, CreateDestination);
+    this.#destinations = this.#destinationsApiService.destinations;
   }
 
   get Destinations() {
@@ -17,6 +14,15 @@ export default class TripDestinationsModel {
 
   set Destinations(destinations) {
     this.#destinations = destinations;
+  }
+
+  async init() {
+    try {
+      const destinations = await this.#destinationsApiService.destinations;
+      this.#destinations = destinations;
+    } catch(err) {
+      this.#destinations = [];
+    }
   }
 
   changeDestination(editedDestination) {

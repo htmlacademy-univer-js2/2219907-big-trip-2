@@ -1,4 +1,4 @@
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createNavigationTemplate = () => (`
 <nav class="trip-controls__trip-tabs  trip-tabs">
@@ -7,7 +7,7 @@ const createNavigationTemplate = () => (`
 </nav>
 `);
 
-export default class NavigationView extends AbstractStatefulView {
+export default class NavigationView extends AbstractView {
   get template() {
     return createNavigationTemplate;
   }
