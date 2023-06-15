@@ -7,18 +7,35 @@ export default class TripHeaderPresenter {
   #navigationContainer = this.#tripMainContainer.querySelector('.trip-controls__navigation');
 
   #tripPointsModel;
+  #tripOffersModel;
 
   #tripInfoComponent = new TripInfoView();
   #navigationComponent = new NavigationView();
 
-  init(tripPointsModel) {
+  constructor(tripPointsModel, tripOffersModel) {
     this.#tripPointsModel = tripPointsModel;
-    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
-    render(this.#navigationComponent, this.#navigationContainer);
+    this.#tripOffersModel = tripOffersModel;
   }
 
+  init() {
+    render(this.#navigationComponent, this.#navigationContainer);
+    this.#tripPointsModel.addObserver(this.renderTripInfo);
+    this.#tripPointsModel.addObserver(this.totalPriceHandler);
+  }
+
+  renderTripInfo = () => {
+    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
+    this.#tripPointsModel.removeObserver(this.renderTripInfo);
+  };
+
   totalPriceHandler = () => {
-    const totalPrice = this.#tripPointsModel.TripPoints.map((point) => point.basePrice).reduce((total, curVal) => total + curVal, 0);
+    let totalPrice = 0;
+    const allOffers = this.#tripOffersModel.OffersByType.map((offerByType) => offerByType.offers);
+    for (const tripPoint of this.#tripPointsModel.TripPoints) {
+      totalPrice += tripPoint.basePrice;
+      totalPrice += allOffers.filter((offer) => offer.id in tripPoint.offers).reduce((total, curOffer) => total + curOffer.price);
+    }
+
     this.#tripInfoComponent.changeTotalPrice(totalPrice);
     remove(this.#tripInfoComponent);
     render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);

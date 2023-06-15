@@ -35,10 +35,22 @@ export default class TripPointsModel extends Observable {
     this._notify(updateType, tripPoint);
   }
 
-  editTripPoint(updateType, editedPoint) {
-    const i = this.#tripPoints.findIndex((item) => item.id === editedPoint.id);
-    this.#tripPoints[i] = editedPoint;
-    this._notify(updateType, editedPoint);
+  async editTripPoint(updateType, updatePoint) {
+    const i = this.#tripPoints.findIndex((item) => item.id === updatePoint.id);
+
+    if (i === -1) {
+      throw new Error('Can\'t edit unexisting trip point');
+    }
+
+    try {
+      const responce = await this.#tripPointsApiService.updateTripPoint(updatePoint);
+      const updatedPoint = this.#adaptToClient(responce);
+      this.#tripPoints[i] = updatedPoint;
+      this._notify(updateType, updatedPoint);
+    } catch(err) {
+      throw new Error('Can\'t edit trip point');
+    }
+
   }
 
   deleteTripPoint(updateType, tripPoint) {

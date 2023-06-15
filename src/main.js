@@ -21,14 +21,13 @@ const tripOffersModel = new TripOffersModel(new OffersApiService(END_POINT, AUTH
 const tripFiltersModel = new TripFiltersModel();
 
 const tripPresenter = new TripPresenter();
-const tripHeaderPresenter = new TripHeaderPresenter();
+const tripHeaderPresenter = new TripHeaderPresenter(tripPointsModel, tripOffersModel);
 const tripFiltersPresenter = new TripFiltersPresenter();
 
 tripPresenter.init(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel);
-tripHeaderPresenter.init(tripPointsModel);
+tripHeaderPresenter.init();
 tripFiltersPresenter.init(tripFiltersModel);
 
 tripFiltersModel.addObserver(tripPresenter.handleModelEvent);
 tripPointsModel.addObserver(tripPresenter.handleModelEvent);
-tripPointsModel.addObserver(tripHeaderPresenter.totalPriceHandler);
 tripPointsModel.init();

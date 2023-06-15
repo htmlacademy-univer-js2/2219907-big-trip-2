@@ -41,11 +41,11 @@ export default class TripPresenter {
   }
 
   init() {
-    this.#newPointButton();
+
     this.#renderTripPresenter();
   }
 
-  #newPointButton() {
+  #setNewPointClickHandler() {
     this.#newPointButtonContainer.addEventListener('click', this.#handleNewPointClick);
   }
 
@@ -60,6 +60,12 @@ export default class TripPresenter {
   #handleNewPointClose = () => (this.#newPointButtonContainer.disabled = false);
 
   #renderTripPresenter = () => {
+    if (this.#isLoading) {
+      this.#newPointButtonContainer.disabled = true;
+      this.#renderLoading();
+      return;
+    }
+
     this.#updateTripPoints();
     this.#destinations = this.#tripDestinationsModel.Destinations;
     this.#offersByType = this.#tripOffersModel.OffersByType;
@@ -69,6 +75,8 @@ export default class TripPresenter {
       this.#renderTripPoints();
     }
   };
+
+  #renderLoading = () => render(this.#loadingComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
 
   #updateTripPoints() {
     this.#tripPoints = filterBy[this.#tripFiltersModel.FilterState](this.#tripPoints);
@@ -80,7 +88,8 @@ export default class TripPresenter {
     this.#tripPointPresenters.forEach((presenter) => presenter.destroy());
     this.#tripPointPresenters.clear();
 
-    // remove(this.#sortComponent);
+    remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#emptyComponent) {
       remove(this.#emptyComponent);
@@ -102,10 +111,7 @@ export default class TripPresenter {
   };
 
   #renderSort = () => {
-    if (this.#sortComponent) {
-      remove(this.#sortComponent);
-      this.#sortComponent = new SortView();
-    }
+    this.#sortComponent = new SortView();
     this.#sortComponent.setSortTypeHandler(this.#handleSortType);
     render(this.#sortComponent, this.#tripEventsContainer, RenderPosition.AFTERBEGIN);
   };
@@ -162,6 +168,8 @@ export default class TripPresenter {
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
+        this.#handleNewPointClose();
+        this.#setNewPointClickHandler();
         remove(this.#loadingComponent);
         this.#renderTripPresenter();
         break;
