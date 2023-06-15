@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { CapitalizeFirstLetter, DateDifference } from '../utils/trip.js';
 import he from 'he';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createPointTemplate(tripPoint, destinations, offersByType) {
   const {type, dateFrom, dateTo, basePrice, destination, offers, isFavorite} = tripPoint;
@@ -55,7 +55,7 @@ function createPointTemplate(tripPoint, destinations, offersByType) {
 </li>
 `;}
 
-export default class PointView extends AbstractStatefulView {
+export default class PointView extends AbstractView {
   #tripPoint;
   #destinations;
   #offersByType;
@@ -71,14 +71,14 @@ export default class PointView extends AbstractStatefulView {
     return createPointTemplate(this.#tripPoint, this.#destinations, this.#offersByType);
   }
 
-  #clickHandler = (evt) => {
+  #toEditClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.editClick();
   };
 
-  setClickHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  setToEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#toEditClickHandler);
   };
 
   #favoriteClickHandler = (evt) => {

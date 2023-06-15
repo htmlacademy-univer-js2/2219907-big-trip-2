@@ -1,14 +1,11 @@
-import { CreateOffersByType } from '../mock/data.js';
-
 export default class TripOffersModel {
-  #offersByType;
+  #offersApiService = null;
+  #offersByType = null;
 
-  constructor() {
-    this.#offersByType = null;
-  }
+  constructor(offersApiService) {
+    this.#offersApiService = offersApiService;
 
-  init() {
-    this.#offersByType = CreateOffersByType();
+    this.#offersByType = this.#offersApiService.offers;
   }
 
   get OffersByType() {
@@ -17,6 +14,15 @@ export default class TripOffersModel {
 
   set OffersByType(offersByType) {
     this.#offersByType = offersByType;
+  }
+
+  async init() {
+    try {
+      const offersByType = await this.#offersApiService.offers;
+      this.#offersByType = offersByType;
+    } catch(err) {
+      this.#offersByType = [];
+    }
   }
 
   changeOffersByType(editedOffer) {

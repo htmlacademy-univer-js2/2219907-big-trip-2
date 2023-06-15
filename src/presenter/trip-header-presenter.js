@@ -1,37 +1,41 @@
-import {remove, render, RenderPosition, replace} from '../framework/render.js';
+import { remove, render, RenderPosition } from '../framework/render.js';
 import NavigationView from '../view/navigation-menu-view.js';
 import TripInfoView from '../view/trip-info-view.js';
-// import StatsView from '../view/stats-view.js';
-
 
 export default class TripHeaderPresenter {
-  #tripMainContainer;
-  #navigationContainer;
-  #tripInfoComponent;
-  #navigationComponent;
+  #tripMainContainer = document.body.querySelector('.trip-main');
+  #navigationContainer = this.#tripMainContainer.querySelector('.trip-controls__navigation');
 
   #tripPointsModel;
+  #tripOffersModel;
 
-  constructor() {
-    this.#tripMainContainer = document.body.querySelector('.trip-main');
-    this.#navigationContainer = this.#tripMainContainer.querySelector('.trip-controls__navigation');
-    this.#tripInfoComponent = new TripInfoView();
-    this.#navigationComponent = new NavigationView();
-  }
+  #tripInfoComponent = new TripInfoView();
+  #navigationComponent = new NavigationView();
 
-  init(tripPointsModel) {
+  constructor(tripPointsModel, tripOffersModel) {
     this.#tripPointsModel = tripPointsModel;
-    this.#renderHeader();
-    this.totalPriceHandler();
+    this.#tripOffersModel = tripOffersModel;
   }
 
-  #renderHeader() {
-    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
+  init() {
     render(this.#navigationComponent, this.#navigationContainer);
+    this.#tripPointsModel.addObserver(this.renderTripInfo);
+    this.#tripPointsModel.addObserver(this.totalPriceHandler);
   }
+
+  renderTripInfo = () => {
+    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
+    this.#tripPointsModel.removeObserver(this.renderTripInfo);
+  };
 
   totalPriceHandler = () => {
-    const totalPrice = this.#tripPointsModel.TripPoints.map((point) => point.basePrice).reduce((total, curVal) => total + curVal, 0);
+    let totalPrice = 0;
+    const allOffers = this.#tripOffersModel.OffersByType.map((offerByType) => offerByType.offers);
+    for (const tripPoint of this.#tripPointsModel.TripPoints) {
+      totalPrice += tripPoint.basePrice;
+      totalPrice += allOffers.filter((offer) => offer.id in tripPoint.offers).reduce((total, curOffer) => total + curOffer.price);
+    }
+
     this.#tripInfoComponent.changeTotalPrice(totalPrice);
     remove(this.#tripInfoComponent);
     render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
