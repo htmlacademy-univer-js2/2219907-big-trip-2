@@ -15,23 +15,21 @@ const AUTHORIZATION = 'Basic 3cdher6jpen0n83l';
 const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
 
-const tripPointsModel = new TripPointsModel({
-  tripPointsApiService: new TripPointsApiService(END_POINT, AUTHORIZATION)
-});
+const tripPointsModel = new TripPointsModel(new TripPointsApiService(END_POINT, AUTHORIZATION));
 const tripDestinationsModel = new TripDestinationsModel(new DestinationsApiService(END_POINT, AUTHORIZATION));
 const tripOffersModel = new TripOffersModel(new OffersApiService(END_POINT, AUTHORIZATION));
 const tripFiltersModel = new TripFiltersModel();
 
 const tripPresenter = new TripPresenter(tripPointsModel, tripDestinationsModel, tripOffersModel, tripFiltersModel);
-const tripHeaderPresenter = new TripHeaderPresenter(tripPointsModel, tripOffersModel);
-const tripFiltersPresenter = new TripFiltersPresenter(tripFiltersModel);
+const tripHeaderPresenter = new TripHeaderPresenter(tripPointsModel, tripOffersModel, tripDestinationsModel);
+const tripFiltersPresenter = new TripFiltersPresenter(tripPointsModel, tripFiltersModel);
+
+tripFiltersModel.addObserver(tripPresenter.handleModelEvent);
+tripPointsModel.addObserver(tripPresenter.handleModelEvent);
 
 tripPresenter.init();
 tripHeaderPresenter.init();
 tripFiltersPresenter.init();
-
-tripFiltersModel.addObserver(tripPresenter.handleModelEvent);
-tripPointsModel.addObserver(tripPresenter.handleModelEvent);
 
 tripOffersModel.init().finally(() => {
   tripDestinationsModel.init().finally(() => {

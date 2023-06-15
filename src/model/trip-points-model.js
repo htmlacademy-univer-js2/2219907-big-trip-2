@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
 
@@ -6,7 +5,7 @@ export default class TripPointsModel extends Observable {
   #tripPointsApiService = null;
   #tripPoints = [];
 
-  constructor({tripPointsApiService}) {
+  constructor(tripPointsApiService) {
     super();
     this.#tripPointsApiService = tripPointsApiService;
   }
@@ -72,8 +71,8 @@ export default class TripPointsModel extends Observable {
   #adaptToClient(tripPoint) {
     const adaptedTripPoint = {...tripPoint,
       basePrice: tripPoint['base_price'],
-      dateFrom: dayjs(tripPoint['date_from']),
-      dateTo: dayjs(tripPoint['date_to']),
+      dateFrom: new Date(tripPoint['date_from']),
+      dateTo: new Date(tripPoint['date_to']),
       isFavorite: tripPoint['is_favorite'],
     };
 

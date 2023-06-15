@@ -19,8 +19,8 @@ function DateDifference(dateFrom, dateTo) {
   return dateDiff;
 }
 
-function DateFormat(date) {
-  return dayjs(date).format('DD/MM/YY HH:mm');
+function DateFormat(date, dateFormat='DD/MM/YY HH:mm') {
+  return dayjs(date).format(dateFormat);
 }
 
 const isEscape = (evt) => evt.key === 'Escape' || evt.key === 'Esc';

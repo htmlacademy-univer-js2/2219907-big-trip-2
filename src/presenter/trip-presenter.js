@@ -72,6 +72,10 @@ export default class TripPresenter {
     }
 
     this.#updateTripPoints();
+    if (this.#tripPoints.length === 0 && this.#tripFiltersModel.FilterState !== FilterStates.EVERYTHING) {
+      this.#tripFiltersModel.setFilterState(UpdateType.NONE, FilterStates.EVERYTHING);
+      this.#updateTripPoints();
+    }
     this.#destinations = this.#tripDestinationsModel.Destinations;
     this.#offersByType = this.#tripOffersModel.OffersByType;
 
@@ -106,12 +110,12 @@ export default class TripPresenter {
     }
   };
 
-  #EmptyCheck = (filterState = FilterStates.EVERYTHING) => {
+  #EmptyCheck = () => {
     if (this.#tripPoints.length !== 0) {
       return true;
     }
     remove(this.#tripPointsListComponent);
-    this.#emptyComponent.changeState(filterState);
+    this.#emptyComponent.changeState(this.#tripFiltersModel.FilterState);
     render(this.#emptyComponent, this.#tripEventsContainer);
     return false;
   };
