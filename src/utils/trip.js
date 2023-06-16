@@ -19,7 +19,7 @@ function DateDifference(dateFrom, dateTo) {
   return dateDiff;
 }
 
-function DateFormat(date, dateFormat='DD/MM/YY HH:mm') {
+function DateFormat(date, dateFormat = 'DD/MM/YY HH:mm') {
   return dayjs(date).format(dateFormat);
 }
 
