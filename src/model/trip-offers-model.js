@@ -6,11 +6,11 @@ export default class TripOffersModel {
     this.#offersApiService = offersApiService;
   }
 
-  get OffersByType() {
+  get offersByType() {
     return this.#offersByType;
   }
 
-  set OffersByType(offersByType) {
+  set offersByType(offersByType) {
     this.#offersByType = offersByType;
   }
 

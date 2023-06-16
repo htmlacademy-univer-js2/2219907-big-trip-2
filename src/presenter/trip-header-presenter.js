@@ -21,20 +21,28 @@ export default class TripHeaderPresenter {
 
   init() {
     render(this.#navigationComponent, this.#navigationContainer);
-    this.#tripPointsModel.addObserver(this.totalPriceHandler);
-    this.#tripPointsModel.addObserver(this.renderTripInfo);
+    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
+    this.#tripPointsModel.addObserver(this.#tripInfoHandler);
+
   }
 
   renderTripInfo = () => {
+    if (this.#tripPointsModel.tripPoints.length === 0) {
+      this.#tripPointsModel.addObserver(this.renderTripInfo);
+      return;
+    }
     render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
     this.#tripPointsModel.removeObserver(this.renderTripInfo);
   };
 
-  totalPriceHandler = () => {
+  #tripInfoHandler = () => {
+    if (this.#tripPointsModel.tripPoints.length === 0) {
+      return;
+    }
     this.#tripInfoComponent.updateElement({
-      tripPoints: this.#tripPointsModel.TripPoints,
-      offersByType: this.#tripOffersModel.OffersByType,
-      destinations: this.#tripDestinationsModel.Destinations
+      tripPoints: this.#tripPointsModel.tripPoints,
+      offersByType: this.#tripOffersModel.offersByType,
+      destinations: this.#tripDestinationsModel.destinations
     });
   };
 }

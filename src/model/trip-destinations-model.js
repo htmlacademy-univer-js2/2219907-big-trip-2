@@ -6,11 +6,11 @@ export default class TripDestinationsModel {
     this.#destinationsApiService = destinationsApiService;
   }
 
-  get Destinations() {
+  get destinations() {
     return this.#destinations;
   }
 
-  set Destinations(destinations) {
+  set destinations(destinations) {
     this.#destinations = destinations;
   }
 
@@ -18,13 +18,15 @@ export default class TripDestinationsModel {
     try {
       const destinations = await this.#destinationsApiService.destinations;
       this.#destinations = destinations;
-    } catch(err) {
+    } catch (err) {
       this.#destinations = [];
     }
   }
 
   changeDestination(editedDestination) {
-    const i = this.#destinations.findIndex((item) => item.id === editedDestination.id);
+    const i = this.#destinations.findIndex(
+      (item) => item.id === editedDestination.id
+    );
     this.#destinations[i] = editedDestination;
   }
 }
