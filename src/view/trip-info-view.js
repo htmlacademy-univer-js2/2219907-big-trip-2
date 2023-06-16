@@ -31,7 +31,6 @@ function findTripDates(tripPoints) {
 }
 
 function createTripInfoTemplate({tripPoints, offersByType, destinations}) {
-
   const totalPrice = countTotalPrice(tripPoints, offersByType);
   const tripRoute = findTripRoute(tripPoints, destinations);
   const tripDates = findTripDates(tripPoints);
@@ -57,6 +56,9 @@ export default class TripInfoView extends AbstractStatefulView {
   }
 
   get template() {
+    if(!this._state) {
+      return '<div></div>';
+    }
     return createTripInfoTemplate(this._state);
   }
 

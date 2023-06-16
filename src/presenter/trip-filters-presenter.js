@@ -27,17 +27,18 @@ export default class TripFiltersPresenter {
       this.#filterComponent.setFilterChangeHandler(this.#handleFilterChange);
       render(this.#filterComponent, this.#filtersContainer);
     }
-    const emptyFilters = Object.values(FilterStates).filter((filter) => filterBy[filter](this.#tripPointsModel.TripPoints).length === 0);
+    const emptyFilters = Object.values(FilterStates).filter((filter) => filterBy[filter](this.#tripPointsModel.tripPoints).length === 0);
     this.#filterComponent.updateElement({
-      currentFilter: this.#tripFiltersModel.FilterState,
+      currentFilter: this.#tripFiltersModel.filterState,
       disabledFilters: emptyFilters
     });
   };
 
   #handleFilterChange = (filterState) => {
-    if (this.#tripFiltersModel.FilterState === filterState) {
+    if (this.#tripFiltersModel.filterState === filterState) {
       return;
     }
     this.#tripFiltersModel.setFilterState(UpdateType.MAJOR, filterState);
+    this.#handleFiltersNecessary();
   };
 }

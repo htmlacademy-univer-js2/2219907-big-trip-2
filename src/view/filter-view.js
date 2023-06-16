@@ -25,6 +25,9 @@ export default class FilterView extends AbstractStatefulView {
   }
 
   get template() {
+    if(!this._state) {
+      return '<div></div>';
+    }
     return createFilterTemplate(this._state);
   }
 

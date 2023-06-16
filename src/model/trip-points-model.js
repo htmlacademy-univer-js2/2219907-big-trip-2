@@ -20,11 +20,11 @@ export default class TripPointsModel extends Observable {
     this._notify(UpdateType.INIT);
   }
 
-  get TripPoints () {
+  get tripPoints () {
     return this.#tripPoints;
   }
 
-  set TripPoints(tripPoints) {
+  set tripPoints(tripPoints) {
     this.#tripPoints = tripPoints;
     this._notify();
   }
