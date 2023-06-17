@@ -1,9 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { FilterState } from '../utils/filter.js';
 
 const EmptyStates = {
-  'everything': 'Click New Event to create your first point',
-  'past': 'There are no past events now',
-  'future': 'There are no future events now'
+  [FilterState.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterState.FUTURE]: 'There are no future events now',
+  [FilterState.PAST]: 'There are no past events now'
 };
 
 const createEmptyTemplate = (state) => (`
@@ -11,7 +12,7 @@ const createEmptyTemplate = (state) => (`
 `);
 
 export default class EmptyView extends AbstractView {
-  #state = 'everything';
+  #state = FilterState.EVERYTHING;
 
   get template() {
     return createEmptyTemplate(this.#state);

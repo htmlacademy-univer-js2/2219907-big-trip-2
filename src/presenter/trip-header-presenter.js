@@ -6,12 +6,12 @@ export default class TripHeaderPresenter {
   #tripMainContainer = document.body.querySelector('.trip-main');
   #navigationContainer = this.#tripMainContainer.querySelector('.trip-controls__navigation');
 
+  #tripInfoComponent = new TripInfoView();
+  #navigationComponent = new NavigationView();
+
   #tripPointsModel;
   #tripOffersModel;
   #tripDestinationsModel;
-
-  #tripInfoComponent = new TripInfoView();
-  #navigationComponent = new NavigationView();
 
   constructor(tripPointsModel, tripOffersModel, tripDestinationsModel) {
     this.#tripPointsModel = tripPointsModel;
@@ -23,17 +23,7 @@ export default class TripHeaderPresenter {
     render(this.#navigationComponent, this.#navigationContainer);
     render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
     this.#tripPointsModel.addObserver(this.#tripInfoHandler);
-
   }
-
-  renderTripInfo = () => {
-    if (this.#tripPointsModel.tripPoints.length === 0) {
-      this.#tripPointsModel.addObserver(this.renderTripInfo);
-      return;
-    }
-    render(this.#tripInfoComponent, this.#tripMainContainer, RenderPosition.AFTERBEGIN);
-    this.#tripPointsModel.removeObserver(this.renderTripInfo);
-  };
 
   #tripInfoHandler = () => {
     if (this.#tripPointsModel.tripPoints.length === 0) {

@@ -1,7 +1,7 @@
 import EditPointView from '../view/edit-point-view.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
 import { isEscape } from '../utils/trip.js';
-import { UserActions, UpdateType } from '../const.js';
+import { UserAction, UpdateType } from '../const.js';
 
 
 export default class TripNewPointPresenter {
@@ -30,8 +30,8 @@ export default class TripNewPointPresenter {
       isNewPoint: true
     });
 
-    this.#editComponent.setSubmitHandler(this.#handleSubmitClick);
-    this.#editComponent.setDeleteHandler(this.#handleDeleteClick);
+    this.#editComponent.setSubmitHandler(this.#submitClickHandler);
+    this.#editComponent.setDeleteHandler(this.#deleteClickHandler);
 
     render(this.#editComponent, this.#tripPointsListComponent.element, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#EscKeyDownHandler);
@@ -68,11 +68,11 @@ export default class TripNewPointPresenter {
     document.removeEventListener('keydown', this.#EscKeyDownHandler);
   };
 
-  #handleSubmitClick = (tripPoint) => {
-    this.#handleDataChange(UserActions.ADD, UpdateType.MINOR, tripPoint);
+  #submitClickHandler = (tripPoint) => {
+    this.#handleDataChange(UserAction.ADD, UpdateType.MINOR, tripPoint);
   };
 
-  #handleDeleteClick = () => this.destroy();
+  #deleteClickHandler = () => this.destroy();
 
   #EscKeyDownHandler = (evt) => {
     if (isEscape(evt)) {

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { DateFormat } from '../utils/trip.js';
+import { formatDate } from '../utils/trip.js';
 
 function findTripRoute(tripPoints, destinations) {
   const uniqueDestintions = Array.from(new Set(tripPoints.map((tripPoint) => tripPoint.destination)));
@@ -13,12 +13,11 @@ function findTripRoute(tripPoints, destinations) {
 
 function countTotalPrice(tripPoints, offersByType) {
   let totalPrice = 0;
-  const allOffers = offersByType.map((offerByType) => [offerByType.type, offerByType.offers]);
   for (const tripPoint of tripPoints) {
     totalPrice += tripPoint.basePrice;
-    totalPrice = allOffers
-      .filter((offer) => offer[0] === tripPoint.type)[0][1]
-      .filter((offer) => offer.id in tripPoint.offers)
+    totalPrice = offersByType
+      .find((offer) => offer.type === tripPoint.type).offers
+      .filter((offer) => tripPoint.offers.includes(offer.id))
       .reduce((total, curOffer) => total + curOffer.price, totalPrice);
   }
   return totalPrice;
@@ -27,7 +26,7 @@ function countTotalPrice(tripPoints, offersByType) {
 function findTripDates(tripPoints) {
   const startDate = tripPoints.at(0).dateFrom;
   const endDate = tripPoints.at(-1).dateTo;
-  return [DateFormat(startDate, 'MMM DD'), DateFormat(endDate, dayjs(startDate).month() === dayjs(endDate).month() ? 'DD' : 'MMM DD')];
+  return [formatDate(startDate, 'MMM DD'), formatDate(endDate, dayjs(startDate).month() === dayjs(endDate).month() ? 'DD' : 'MMM DD')];
 }
 
 function createTripInfoTemplate({tripPoints, offersByType, destinations}) {
