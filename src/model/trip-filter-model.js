@@ -1,9 +1,9 @@
 import Observable from '../framework/observable.js';
-import { FilterStates } from '../utils/filter.js';
+import { FilterState } from '../utils/filter.js';
 
 
 export default class TripFilterModel extends Observable {
-  #filterState = FilterStates.EVERYTHING;
+  #filterState = FilterState.EVERYTHING;
 
   get filterState() {
     return this.#filterState;
