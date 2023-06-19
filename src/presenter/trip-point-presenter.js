@@ -140,7 +140,6 @@ export default class TripPointPresenter {
 
   #submitClickHandler = (tripPoint) => {
     this.#handleChangeData(UserAction.EDIT, UpdateType.MINOR, tripPoint);
-    this.#replaceEditToPoint();
   };
 
   #deleteClickHandler = (tripPoint) => {
