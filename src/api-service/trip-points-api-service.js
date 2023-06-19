@@ -43,6 +43,9 @@ export default class TripPointsApiService extends ApiService {
   }
 
   #adaptToServer(tripPoint) {
+    if (tripPoint.basePrice <= 0) {
+      throw new Error('Price must be positive number.');
+    }
     const adaptedTripPoint = {...tripPoint,
       'base_price': tripPoint.basePrice,
       'date_from': dayjs(tripPoint.dateFrom).toDate() instanceof Date ? tripPoint.dateFrom.toISOString() : null,
